@@ -1,5 +1,5 @@
 ---
-title: "Session Handoffs: Giving Your AI Assistant Memory That Actually Persists"
+title: "Mother CLAUDE: Session Handoffs Give Your AI Memory That Actually Persists"
 published: true
 description: LLM sessions are ephemeral. Session handoffs are structured documents that give your AI persistent, searchable, portable memory across sessions and tools.
 tags: ai, productivity, documentation, devops

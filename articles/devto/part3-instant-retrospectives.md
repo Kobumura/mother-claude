@@ -1,5 +1,5 @@
 ---
-title: "Instant Retrospectives: Assigning Quality Enforcement to Your AI Assistant"
+title: "Mother CLAUDE: Instant Retrospectives Assign Quality Enforcement to Your AI"
 published: false
 description: How we made Claude responsible for initiating quality checkpoints at every commit and PR—so humans don't have to remember.
 tags: ai, codequality, productivity, devops

@@ -1,45 +1,96 @@
 # Session Handoff Template
 
 **Filename format**: `YYYYMMDD-HHMM-brief-description.md`
-**Location**: Each project's `docs/session_handoffs/` directory
+**Location**: Each project's `docs/session_handoffs/`
 
 ---
 
-# Session Handoff - [Date] [Time]
+# Session Handoff - [Brief Title]
 
-## What We Accomplished
-- [Completed task with context on approach taken]
-- [Decision made and why]
+**Date**: [YYYY-MM-DD]
+**Session Duration**: [X hours]
 
-## Current State
-- [Where the work stands]
-- [Any running processes or partial implementations]
+---
 
-## Lessons Learned
-- [What worked well]
-- [What didn't work / mistakes to avoid]
+## 🎯 Session Overview
 
-## Next Steps
-- [ ] [Clear, actionable next task]
-- [ ] [Another task]
+### Primary Mission
+[Single sentence: what was the intended goal?]
 
-## Key Files Modified
-- `path/to/file.ts` - [what changed]
-- `path/to/other.ts` - [what changed]
+### Major Accomplishments
+- ✅ [Completed task 1]
+- ✅ [Completed task 2]
+- ✅ [Completed task 3]
 
-## Blockers / Open Questions
-- [Unresolved problems]
-- [Questions that need answers before proceeding]
+---
+
+## 🔧 Technical Discoveries
+
+[What did you learn? Architecture insights, gotchas, patterns discovered — separate from what you built.]
+
+- **[Topic]**: [What you learned]
+- **[Topic]**: [What you learned]
+
+---
+
+## 📁 Key Files Modified
+
+| File | Change |
+|------|--------|
+| `path/to/file.ts` | [What changed] |
+| `path/to/other.ts` | [What changed] |
+
+---
+
+## 💡 Lessons Learned
+
+- **What worked**: [Approach that succeeded]
+- **What didn't**: [Approach that failed or caused issues]
+- **Watch out for**: [Gotchas for future sessions]
+
+---
+
+## ⚡ Immediate Next Steps
+
+1. [ ] [Clear, actionable task with ticket ref if applicable]
+2. [ ] [Next task]
+3. [ ] [Next task]
+
+---
+
+## 🚧 Blockers / Open Questions
+
+- [Unresolved problem or decision needed]
+- [Question that needs an answer before proceeding]
+
+---
+
+## 🏗️ Environment
+
+- **Machine**: [Device name/type]
+- **Platform**: [OS]
+- **Working Directory**: [Path]
+
+---
+
+## 📊 Session Metrics
+
+- **Duration**: [X hours]
+- **Files Created**: [N]
+- **Files Modified**: [N]
+- **Commits**: [N]
 
 ---
 
 ## When to Create a Session Handoff
 
+Claude should proactively initiate handoffs when:
+
 | Trigger | Why |
 |---------|-----|
-| Approaching context limits | Claude Code will notify you when context is filling up |
-| Natural stopping points | Completed a feature? Reached a milestone? |
-| Before switching tasks | About to pivot from backend to frontend? |
+| Approaching context limits | Don't lose accumulated understanding |
+| Natural stopping points | Completed a feature or milestone |
+| Before switching tasks | Context shift = context loss |
 | End of work session | Future-you will thank you |
 | Before major decisions | Document tradeoffs before choosing |
 
@@ -49,7 +100,7 @@
 2. Read it for current state and pending tasks
 3. Continue from where previous session ended
 
-The transition takes seconds instead of the 10-15 minutes of re-establishing context manually.
+The transition takes seconds instead of 10-15 minutes of re-establishing context.
 
 ---
 

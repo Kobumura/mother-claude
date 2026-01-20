@@ -66,6 +66,8 @@ This repo includes templates to get you started:
 | [`templates/CLAUDE.md`](templates/CLAUDE.md) | Project-specific context file |
 | [`templates/EVOLUTION.md`](templates/EVOLUTION.md) | Historical context for legacy projects |
 | [`templates/session-handoff.md`](templates/session-handoff.md) | Context preservation across sessions |
+| [`templates/session-index.md`](templates/session-index.md) | Quick navigation to all session handoffs |
+| [`templates/current-project-state.md`](templates/current-project-state.md) | Living snapshot of what's deployed, working, broken |
 | [`templates/checkpoint-checklist.md`](templates/checkpoint-checklist.md) | Quality gates at every commit |
 
 ## The Article Series

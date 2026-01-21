@@ -1,0 +1,514 @@
+---
+title: "Mother CLAUDE: Automating Session Handoffs with Hooks"
+published: false
+description: How we used Claude Code hooks to automatically generate session handoff documents—so memory persists without manual effort.
+tags: ai, automation, productivity, developerexperience
+series: Designing AI Teammates
+canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part4-automated-handoffs.md
+---
+
+> **TL;DR**: Session handoffs are valuable but easy to forget. We built a hook that automatically generates them using Claude Haiku—triggered on context compaction and session end. Now memory persists without manual effort.
+
+*Who this is for: Anyone who's forgotten to create a session handoff at the end of a productive coding session and lost context. Anyone who wants AI memory that doesn't depend on human discipline.*
+
+**Part 4 of the Designing AI Teammates series.** Part 1 covered documentation structure. Part 2 covered why session handoffs matter. Part 3 covered quality checkpoints. This one covers making handoffs automatic so they actually happen.
+
+---
+
+## The Problem
+
+Session handoffs work. We covered that in Part 2. The template captures:
+- What was accomplished
+- Key decisions made
+- Files modified
+- Next steps
+- Open questions
+
+The problem? **Humans forget to create them.**
+
+You finish a productive session, you're in the flow, you close the terminal... and the handoff doesn't get written. The next session starts cold. All that context—gone.
+
+We needed handoffs to happen automatically, without relying on human discipline at the end of a long session.
+
+---
+
+## The Solution: Claude Code Hooks
+
+Claude Code has a hooks system that runs scripts at specific events. Two events matter for us:
+
+| Hook | When It Fires | Why It Matters |
+|------|---------------|----------------|
+| **PreCompact** | Before context compression | Captures everything before detail is lost |
+| **SessionEnd** | When you close the session | Captures final state |
+
+The hook receives the full conversation transcript. We can parse it, send it to Claude Haiku for summarization, and save a structured handoff document—all automatically.
+
+---
+
+## The Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                  Claude Code Session                 │
+│                                                     │
+│  [Working...]  [Working...]  [Context getting full] │
+│                                                     │
+│                         │                           │
+│                         ▼                           │
+│              ┌──────────────────┐                   │
+│              │  PreCompact Hook │                   │
+│              └────────┬─────────┘                   │
+│                       │                             │
+└───────────────────────┼─────────────────────────────┘
+                        │
+                        ▼
+              ┌──────────────────┐
+              │ session_handoff  │
+              │     .py          │
+              │                  │
+              │ 1. Read transcript
+              │ 2. Parse conversation
+              │ 3. Call Claude Haiku
+              │ 4. Save handoff.md
+              └────────┬─────────┘
+                       │
+                       ▼
+         ┌─────────────────────────────┐
+         │  docs/session_handoffs/      │
+         │  20260121-1145-hooks-setup.md│
+         └─────────────────────────────┘
+```
+
+---
+
+## The Implementation
+
+### Step 1: The Hook Script
+
+A Python script that:
+1. Receives hook input via stdin (includes transcript path)
+2. Parses the JSONL transcript into readable conversation
+3. Sends it to Claude Haiku with a structured prompt
+4. Extracts a descriptive title for the filename
+5. Saves to the project's `session_handoffs/` directory
+
+```python
+#!/usr/bin/env python3
+"""
+Mother CLAUDE Session Handoff Generator
+
+Runs on PreCompact (auto) and SessionEnd events to automatically
+generate session handoff documents using Claude Haiku.
+"""
+
+import json
+import os
+import sys
+from datetime import datetime
+from pathlib import Path
+import anthropic
+
+def parse_transcript(transcript_path: str) -> str:
+    """Parse JSONL transcript into readable conversation."""
+    messages = []
+    with open(transcript_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            entry = json.loads(line)
+            if entry.get("type") == "human":
+                content = extract_text(entry)
+                messages.append(f"USER: {content[:3000]}")
+            elif entry.get("type") == "assistant":
+                content = extract_text(entry)
+                messages.append(f"ASSISTANT: {content[:3000]}")
+
+    # Return last 80 messages for context
+    return "\n\n---\n\n".join(messages[-80:])
+
+def generate_handoff(conversation: str, cwd: str, api_key: str):
+    """Use Claude Haiku to generate a session handoff."""
+    client = anthropic.Anthropic(api_key=api_key)
+
+    response = client.messages.create(
+        model="claude-3-haiku-20240307",
+        max_tokens=4000,
+        messages=[{
+            "role": "user",
+            "content": HANDOFF_PROMPT.format(
+                conversation=conversation,
+                project=Path(cwd).name,
+                date=datetime.now().strftime("%Y-%m-%d")
+            )
+        }]
+    )
+
+    return response.content[0].text
+```
+
+### Step 2: The Prompt Template
+
+The prompt asks for a comprehensive handoff matching our template:
+
+```python
+HANDOFF_TEMPLATE = """
+Generate a session handoff document with these sections:
+
+SHORT_TITLE: [2-4 words, hyphenated, for filename]
+
+# Session Handoff - [Descriptive Title]
+
+**Date**: {date}
+**Focus**: [Main focus of this session]
+**Status**: [Current state of the work]
+
+## Quick Context
+**What's Working:** [Specific things that are functional]
+**What Needs Attention:** [Issues, blockers, pending decisions]
+
+## Completed This Session
+### [Feature/Task Name]
+**Files Created/Modified:**
+- `path/to/file.ext` - [What was done]
+
+**Details:** [Technical specifics]
+
+## Technical Discoveries
+- **[Topic]**: [What was learned]
+
+## Files Changed This Session
+### New Files
+### Modified Files
+
+## Next Steps
+1. [ ] [Actionable task]
+
+## Open Questions
+- [Unresolved decisions]
+"""
+```
+
+### Step 3: Hook Configuration
+
+In `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ~/.claude/hooks/session_handoff.py",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ~/.claude/hooks/session_handoff.py",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Step 4: API Key Setup
+
+Store your Anthropic API key as an environment variable:
+
+```bash
+# Linux/Mac
+export ANTHROPIC_API_KEY_HOOKS="sk-ant-..."
+
+# Windows PowerShell
+[System.Environment]::SetEnvironmentVariable(
+    "ANTHROPIC_API_KEY_HOOKS",
+    "sk-ant-...",
+    "User"
+)
+```
+
+Using a separate key (`ANTHROPIC_API_KEY_HOOKS`) lets you track usage for automated handoffs separately from your main Claude Code usage.
+
+---
+
+## The Result
+
+### Before: Manual Handoffs
+
+```
+End of session:
+- Forget to create handoff (60% of the time)
+- Create hasty handoff (30% of the time)
+- Create thorough handoff (10% of the time)
+
+Next session:
+- Spend 10-15 minutes re-establishing context
+- Miss important details from previous session
+- Repeat work already done
+```
+
+### After: Automatic Handoffs
+
+```
+End of session:
+- Hook fires automatically
+- Handoff created in ~30 seconds
+- Saved to docs/session_handoffs/
+
+Next session:
+- Read most recent handoff
+- Productive in 2-3 minutes
+- Full context preserved
+```
+
+---
+
+## Example Output
+
+Here's an actual auto-generated handoff:
+
+```markdown
+# Session Handoff - Implementing Automated Session Handoffs
+
+**Date**: 2026-01-21
+**Focus**: Integrating Claude hooks to automatically generate session handoffs
+**Status**: Feature complete, ready for testing
+
+---
+
+## Quick Context
+
+**What's Working:**
+- Claude hook script written in Python to summarize sessions
+- Hooks configured to trigger on auto-compact and session end
+- Handoff files being generated in the expected location
+
+**What Needs Attention:**
+- API key needs to be regenerated (was exposed during testing)
+- Template may need refinement based on real-world usage
+
+---
+
+## Completed This Session
+
+### Implement Hook-Driven Session Handoffs
+**Files Created/Modified:**
+- `~/.claude/hooks/session_handoff.py` - Python script to generate handoffs
+- `~/.claude/settings.json` - Hook configuration
+
+**Details:**
+- Wrote a Python script using the Anthropic API to summarize transcripts
+- Configured two hook triggers: PreCompact (auto) and SessionEnd
+- Script auto-detects working directory to determine project context
+- Handoff files saved to project's `docs/session_handoffs/`
+
+---
+
+## Technical Discoveries
+
+- **Environment Variables**: Using separate API key for hooks allows
+  tracking automated usage separately from interactive sessions
+- **Hook Timing**: PreCompact fires BEFORE compression, so full context
+  is still available for summarization
+
+---
+
+## Files Changed This Session
+
+### New Files
+- `~/.claude/hooks/session_handoff.py` - Handoff generation script
+
+### Modified Files
+- `~/.claude/settings.json` - Added hook configuration
+
+---
+
+## Next Steps
+
+1. [ ] Regenerate API key (current one exposed in conversation)
+2. [ ] Test on different projects to verify directory detection
+3. [ ] Consider adding git commit info to handoffs
+
+---
+
+## Open Questions
+
+- Should handoffs include actual code snippets from the session?
+- How to handle very long sessions that exceed Haiku's context window?
+```
+
+---
+
+## The Meta Moment: Using Claude to Summarize Claude
+
+There's something delightfully recursive about this setup:
+
+1. You work with Claude Code (Claude Opus/Sonnet)
+2. Session ends or context fills
+3. Hook sends transcript to Claude Haiku
+4. Haiku summarizes what Opus/Sonnet did
+5. Summary helps the next Opus/Sonnet session
+
+**Claude is documenting its own work for its future self.**
+
+This isn't just automation—it's AI infrastructure supporting AI collaboration.
+
+---
+
+## Why Two Triggers?
+
+### PreCompact (auto)
+
+Fires when context is about to be compressed. This is critical because:
+- Context compression loses detail
+- The full conversation is still available at this point
+- Handoff captures everything *before* information is lost
+
+### SessionEnd
+
+Fires when you close Claude Code. This ensures:
+- Final state is always captured
+- Even short sessions get documented
+- No session ends without a handoff
+
+**Both triggers run the same script.** The handoff includes the trigger type so you can see what caused it:
+
+```markdown
+**Trigger**: auto (context compression)
+```
+
+or
+
+```markdown
+**Trigger**: SessionEnd
+```
+
+---
+
+## Handling Large Sessions
+
+Haiku has a smaller context window than Opus. For very long sessions:
+
+1. The script takes the **last 80 messages** of the conversation
+2. Each message is truncated to 3,000 characters
+3. This keeps the most recent (and usually most relevant) context
+
+For most sessions, this captures everything that matters. The early parts of very long sessions (initial exploration, early false starts) are often less valuable than the recent work anyway.
+
+---
+
+## Cost Considerations
+
+Claude Haiku is cheap. A typical handoff:
+- Input: ~50,000 tokens (conversation)
+- Output: ~1,500 tokens (handoff)
+- Cost: ~$0.02-0.03 per handoff
+
+Even with multiple sessions per day, the monthly cost is negligible compared to the value of preserved context.
+
+**Pro tip**: Create a separate API key for hooks. The Anthropic console shows usage per key, so you can track exactly how much your automated handoffs cost.
+
+---
+
+## Extending the System
+
+### Add Git Info
+
+```python
+import subprocess
+
+def get_recent_commits():
+    result = subprocess.run(
+        ["git", "log", "--oneline", "-5"],
+        capture_output=True, text=True
+    )
+    return result.stdout
+```
+
+### Add to Multiple Projects
+
+The script auto-detects the project from `cwd` and finds the right `session_handoffs/` directory. It works across all your projects without configuration.
+
+### Customize Per Project
+
+If you need project-specific handoff formats, add a `.claude/handoff-config.json` to any project:
+
+```json
+{
+  "template": "custom",
+  "include_git": true,
+  "extra_sections": ["Jira Tickets", "API Changes"]
+}
+```
+
+---
+
+## Known Limitations
+
+### Can't Prevent Compaction
+PreCompact hooks can run side effects but can't stop compaction. The handoff happens, then compaction proceeds. This is fine—we just want to capture context, not block the workflow.
+
+### Timeout
+Hooks have a 60-second default timeout (we set 120). Very long transcripts might need more time. The script handles timeouts gracefully—a failed handoff is better than a blocked session.
+
+### API Dependency
+Requires an Anthropic API key and internet connection. If the API is down, the hook fails silently. Consider adding local fallback summarization for offline work.
+
+---
+
+## The Setup Checklist
+
+1. [ ] **Install Python** with `anthropic` package
+2. [ ] **Create the script** at `~/.claude/hooks/session_handoff.py`
+3. [ ] **Configure hooks** in `~/.claude/settings.json`
+4. [ ] **Set API key** as environment variable
+5. [ ] **Test manually** by piping fake input to the script
+6. [ ] **Verify in real session** by checking `session_handoffs/` after closing
+
+---
+
+## The Core Insight
+
+**The best documentation is documentation that writes itself.**
+
+Session handoffs are valuable. But relying on human discipline at the end of a long session is a recipe for forgotten context.
+
+By automating handoffs:
+- Memory persists without effort
+- Every session is documented
+- Context survives across sessions, machines, and time
+
+**The goal isn't to replace human judgment. It's to ensure the conversation happens.**
+
+---
+
+*This system was built in a single afternoon—and documented by the very hook system it describes. The handoff you're reading about was generated by the hook that creates handoffs. That's the feedback loop working as intended.*
+
+---
+
+*This article was written collaboratively with Claude, using the automated handoff system it describes.*
+
+---
+
+## Resources
+
+The session handoff hook and Mother CLAUDE system are open source:
+
+- **GitHub**: [github.com/Kobumura/mother-claude](https://github.com/Kobumura/mother-claude)
+- **Hook script**: `hooks/session_handoff.py` (coming soon)
+- **Settings template**: `templates/settings.json` (coming soon)
+
+Feel free to fork it, adapt it, or use it as a reference for your own implementation.
+
+---
+
+*Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Free to use and adapt with attribution to Dorothy J. Aubrey.*

@@ -69,6 +69,7 @@ This repo includes templates to get you started:
 | [`templates/session-index.md`](templates/session-index.md) | Quick navigation to all session handoffs |
 | [`templates/current-project-state.md`](templates/current-project-state.md) | Living snapshot of what's deployed, working, broken |
 | [`templates/checkpoint-checklist.md`](templates/checkpoint-checklist.md) | Quality gates at every commit |
+| [`templates/charting-pattern.md`](templates/charting-pattern.md) | Chart.js + SVG sparklines for data visualization |
 
 ## The Article Series
 

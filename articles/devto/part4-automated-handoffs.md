@@ -1,17 +1,17 @@
 ---
-title: "Mother CLAUDE: Automating Session Handoffs with Hooks"
+title: "Mother CLAUDE: Automating Everything with Hooks"
 published: false
-description: How we used Claude Code hooks to automatically generate session handoff documents—so memory persists without manual effort.
+description: How we used Claude Code hooks to automate session handoffs, context loading, and permission approvals—turning manual discipline into invisible infrastructure.
 tags: ai, automation, productivity, developerexperience
 series: Designing AI Teammates
 canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part4-automated-handoffs.md
 ---
 
-> **TL;DR**: Session handoffs are valuable but easy to forget. We built a hook that automatically generates them using Claude Haiku—triggered on context compaction and session end. Now memory persists without manual effort.
+> **TL;DR**: We built three hooks that automate the Mother CLAUDE workflow: (1) auto-generate session handoffs on context compaction, (2) load previous handoffs at session start, and (3) auto-approve safe operations. Manual discipline becomes invisible infrastructure.
 
-*Who this is for: Anyone who's forgotten to create a session handoff at the end of a productive coding session and lost context. Anyone who wants AI memory that doesn't depend on human discipline.*
+*Who this is for: Anyone who wants AI memory that doesn't depend on human discipline. Anyone tired of clicking "yes" to approve safe operations.*
 
-**Part 4 of the Designing AI Teammates series.** Part 1 covered documentation structure. Part 2 covered why session handoffs matter. Part 3 covered quality checkpoints. This one covers making handoffs automatic so they actually happen.
+**Part 4 of the Designing AI Teammates series.** Part 1 covered documentation structure. Part 2 covered why session handoffs matter. Part 3 covered quality checkpoints. This one covers automating the entire workflow with hooks.
 
 ---
 
@@ -465,14 +465,166 @@ Requires an Anthropic API key and internet connection. If the API is down, the h
 
 ---
 
+## Bonus Hook #1: Auto-Load Previous Handoffs
+
+Writing handoffs is half the equation. The other half: making sure Claude *reads* them.
+
+### The SessionStart Hook
+
+When you start a new Claude Code session, the `SessionStart` hook fires. We use it to automatically load the most recent handoff:
+
+```python
+# session_start.py - outputs previous handoff to stdout
+handoffs = sorted(glob("docs/session_handoffs/*.md"))
+if handoffs:
+    print(f"Previous handoff: {handoffs[-1].name}")
+    print(open(handoffs[-1]).read())
+```
+
+Claude sees this output as context at the start of every session. No manual loading required.
+
+**Configuration:**
+
+Add to `~/.claude/settings.json`:
+
+```json
+"SessionStart": [
+  {
+    "hooks": [
+      {
+        "type": "command",
+        "command": "python ~/.claude/hooks/session_start.py",
+        "timeout": 10
+      }
+    ]
+  }
+]
+```
+
+**Result:** Every new session starts with context from the previous one. The handoffs we auto-generate get auto-loaded. The circle is complete.
+
+---
+
+## Bonus Hook #2: Auto-Approve Safe Operations
+
+If you've used Claude Code for more than an hour, you've clicked "yes" to approve `git status` approximately 47 times.
+
+### The Permission Fatigue Problem
+
+Claude Code asks permission for potentially dangerous operations. This is good! But it also asks for:
+- `git status`
+- `ls`
+- `npm test`
+- Reading files
+- And dozens of other safe operations
+
+### The PermissionRequest Hook
+
+This hook intercepts permission requests and auto-approves safe ones:
+
+```python
+# auto_approve.py
+always_safe = ["Read", "Glob", "Grep", "Write", "Edit"]
+
+safe_bash = [
+    r'^git\s+(status|log|diff|add|commit|push|pull)',
+    r'^npm\s+(test|run|install)',
+    r'^ls(\s|$)',
+]
+
+dangerous = [
+    r'\bsudo\b',
+    r'git\s+push\s+.*--force',
+    r'git\s+reset\s+--hard',
+]
+```
+
+**What gets auto-approved:**
+- All file operations (Read, Write, Edit)
+- Git operations (add, commit, push, pull)
+- Package management (npm install, pip install)
+- Build/test commands
+
+**What still requires approval:**
+- `sudo` anything
+- `git push --force`
+- `git reset --hard`
+- Destructive operations
+
+**Configuration:**
+
+```json
+"PermissionRequest": [
+  {
+    "matcher": "*",
+    "hooks": [
+      {
+        "type": "command",
+        "command": "python ~/.claude/hooks/auto_approve.py",
+        "timeout": 5
+      }
+    ]
+  }
+]
+```
+
+**Result:** Claude flows. No more clicking "yes" fifty times a session. Dangerous operations still get caught.
+
+---
+
+## Project-Specific Configuration
+
+Different projects might want different settings. Create `.claude/project.json` in any project root:
+
+```json
+{
+  "handoffs_path": "docs/session_handoffs",
+  "handoffs_to_load": 2
+}
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `handoffs_path` | `docs/session_handoffs` | Where to read/write handoffs |
+| `handoffs_to_load` | `1` | How many previous handoffs to load |
+
+Both the session_handoff.py and session_start.py scripts check for this config.
+
+---
+
+## The Complete Hook Suite
+
+Here's what we built:
+
+| Hook | Trigger | What It Does |
+|------|---------|--------------|
+| **session_handoff.py** | PreCompact, SessionEnd | Auto-generates handoff documents |
+| **session_start.py** | SessionStart | Loads previous handoff into context |
+| **auto_approve.py** | PermissionRequest | Auto-approves safe operations |
+
+**The full settings.json:**
+
+```json
+{
+  "hooks": {
+    "SessionStart": [{"hooks": [{"type": "command", "command": "python ~/.claude/hooks/session_start.py"}]}],
+    "PreCompact": [{"matcher": "auto", "hooks": [{"type": "command", "command": "python ~/.claude/hooks/session_handoff.py"}]}],
+    "SessionEnd": [{"hooks": [{"type": "command", "command": "python ~/.claude/hooks/session_handoff.py"}]}],
+    "PermissionRequest": [{"matcher": "*", "hooks": [{"type": "command", "command": "python ~/.claude/hooks/auto_approve.py"}]}]
+  }
+}
+```
+
+---
+
 ## The Setup Checklist
 
 1. [ ] **Install Python** with `anthropic` package
-2. [ ] **Create the script** at `~/.claude/hooks/session_handoff.py`
+2. [ ] **Copy hook scripts** to `~/.claude/hooks/`
 3. [ ] **Configure hooks** in `~/.claude/settings.json`
 4. [ ] **Set API key** as environment variable
-5. [ ] **Test manually** by piping fake input to the script
-6. [ ] **Verify in real session** by checking `session_handoffs/` after closing
+5. [ ] **Restart terminal** (hooks load at session start)
+6. [ ] **Verify** by starting a new session and checking for previous handoff
 
 ---
 
@@ -501,11 +653,12 @@ By automating handoffs:
 
 ## Resources
 
-The session handoff hook and Mother CLAUDE system are open source:
+The complete hook suite and Mother CLAUDE system are open source:
 
 - **GitHub**: [github.com/Kobumura/mother-claude](https://github.com/Kobumura/mother-claude)
-- **Hook script**: `hooks/session_handoff.py` (coming soon)
-- **Settings template**: `templates/settings.json` (coming soon)
+- **All hooks**: `hooks/` directory
+- **Settings template**: `hooks/settings-template.json`
+- **Setup guide**: `hooks/README.md`
 
 Feel free to fork it, adapt it, or use it as a reference for your own implementation.
 

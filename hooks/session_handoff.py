@@ -1,0 +1,309 @@
+#!/usr/bin/env python3
+"""
+Mother CLAUDE Session Handoff Generator
+
+This hook runs on PreCompact (auto) and SessionEnd events to automatically
+generate session handoff documents using Claude Haiku.
+
+Reads the conversation transcript and creates a structured handoff file
+following the Mother CLAUDE session handoff template.
+
+SETUP:
+1. pip install anthropic
+2. Set ANTHROPIC_API_KEY_HOOKS environment variable
+3. Configure in ~/.claude/settings.json (see settings-template.json)
+"""
+
+import json
+import os
+import re
+import sys
+from datetime import datetime
+from pathlib import Path
+
+try:
+    import anthropic
+except ImportError:
+    print("Error: anthropic SDK not installed. Run: pip install anthropic", file=sys.stderr)
+    sys.exit(1)
+
+
+HANDOFF_TEMPLATE = """
+You are generating a session handoff document for an AI coding assistant.
+This document will help the next Claude session understand what was accomplished and continue seamlessly.
+
+**Project**: {project_name}
+**Trigger**: {trigger}
+**Working Directory**: {cwd}
+
+Based on this conversation transcript, create a comprehensive session handoff document.
+
+CONVERSATION TRANSCRIPT:
+{conversation}
+
+---
+
+Generate a markdown document following this EXACT structure. Be thorough and specific.
+Include actual file paths, code details, and technical specifics from the conversation.
+
+IMPORTANT:
+- First line must be a SHORT_TITLE (2-4 words, lowercase, hyphenated) for the filename
+- Extract SPECIFIC file names, paths, and technical details from the conversation
+- Include code snippets if they were significant
+- Be detailed about what was actually accomplished
+
+---
+
+SHORT_TITLE: [2-4 word hyphenated title like "hooks-auto-handoffs" or "api-refactor-complete"]
+
+# Session Handoff - [Descriptive Title]
+
+**Date**: {date}
+**Focus**: [One line describing the main focus of this session]
+**Status**: [What state is the work in? e.g., "Feature complete, needs testing" or "In progress, blocked on X"]
+
+---
+
+## Quick Context
+
+**What's Working:**
+- [Specific things that are functional now]
+- [Include file names and features]
+
+**What Needs Attention:**
+- [Issues, blockers, or things to watch]
+- [Pending decisions]
+
+---
+
+## Completed This Session
+
+### [Feature/Task Name 1]
+**Files Created/Modified:**
+- `path/to/file.ext` - [What was done]
+
+**Details:**
+[Specific technical details, configurations, code patterns used]
+
+### [Feature/Task Name 2]
+[Continue for each major piece of work...]
+
+---
+
+## Technical Discoveries
+
+- **[Topic]**: [What was learned - gotchas, patterns, insights]
+- **[Topic]**: [Architecture decisions and why]
+
+---
+
+## Files Changed This Session
+
+### New Files
+- `path/to/new/file.ext` - [Purpose]
+
+### Modified Files
+- `path/to/modified/file.ext` - [What changed]
+
+---
+
+## Next Steps
+
+1. [ ] [Specific actionable task]
+2. [ ] [Next task]
+3. [ ] [Next task]
+
+---
+
+## Open Questions
+
+- [Unresolved decisions or questions]
+- [Things that need clarification]
+
+---
+
+## Environment
+
+- **Platform**: {platform}
+- **Working Directory**: {cwd}
+"""
+
+
+def get_api_key():
+    """Get API key from environment variable."""
+    key = os.environ.get("ANTHROPIC_API_KEY_HOOKS") or os.environ.get("ANTHROPIC_API_KEY")
+    if not key:
+        print("Error: ANTHROPIC_API_KEY_HOOKS or ANTHROPIC_API_KEY not set", file=sys.stderr)
+        sys.exit(1)
+    return key
+
+
+def parse_transcript(transcript_path: str) -> str:
+    """Parse JSONL transcript into readable conversation format."""
+    messages = []
+
+    try:
+        with open(transcript_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                try:
+                    entry = json.loads(line)
+
+                    if entry.get("type") == "human":
+                        content = entry.get("message", {}).get("content", "")
+                        if isinstance(content, list):
+                            text_parts = [c.get("text", "") for c in content if c.get("type") == "text"]
+                            content = "\n".join(text_parts)
+                        if content.strip():
+                            messages.append(f"USER: {content[:3000]}")
+
+                    elif entry.get("type") == "assistant":
+                        content = entry.get("message", {}).get("content", "")
+                        if isinstance(content, list):
+                            text_parts = [c.get("text", "") for c in content if c.get("type") == "text"]
+                            content = "\n".join(text_parts)
+                        if content.strip():
+                            messages.append(f"ASSISTANT: {content[:3000]}")
+
+                except json.JSONDecodeError:
+                    continue
+
+    except FileNotFoundError:
+        print(f"Warning: Transcript not found at {transcript_path}", file=sys.stderr)
+        return ""
+    except Exception as e:
+        print(f"Warning: Error reading transcript: {e}", file=sys.stderr)
+        return ""
+
+    # Return last 80 messages for context
+    recent_messages = messages[-80:]
+    return "\n\n---\n\n".join(recent_messages)
+
+
+def find_handoff_directory(cwd: str) -> Path:
+    """Find or create the session_handoffs directory for this project."""
+    cwd_path = Path(cwd)
+
+    # Check for project config first
+    config_path = cwd_path / ".claude" / "project.json"
+    if config_path.exists():
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if "handoffs_path" in config:
+                    custom_path = cwd_path / config["handoffs_path"]
+                    custom_path.mkdir(parents=True, exist_ok=True)
+                    return custom_path
+        except (json.JSONDecodeError, IOError):
+            pass
+
+    # Auto-detect common locations
+    possible_paths = [
+        cwd_path / "docs" / "session_handoffs",
+        cwd_path / "session_handoffs",
+        cwd_path / ".claude" / "session_handoffs",
+    ]
+
+    for path in possible_paths:
+        if path.exists():
+            return path
+
+    # Default to docs/session_handoffs
+    default_path = cwd_path / "docs" / "session_handoffs"
+    default_path.mkdir(parents=True, exist_ok=True)
+    return default_path
+
+
+def extract_short_title(content: str) -> str:
+    """Extract the SHORT_TITLE from the generated content."""
+    match = re.search(r'SHORT_TITLE:\s*(.+)', content)
+    if match:
+        title = match.group(1).strip().lower()
+        title = re.sub(r'[\[\]"\']', '', title)
+        title = re.sub(r'\s+', '-', title)
+        title = re.sub(r'[^a-z0-9-]', '', title)
+        return title[:50]
+    return "session"
+
+
+def remove_short_title_line(content: str) -> str:
+    """Remove the SHORT_TITLE line from the content."""
+    return re.sub(r'SHORT_TITLE:\s*.+\n?', '', content)
+
+
+def generate_handoff(conversation: str, cwd: str, trigger: str, api_key: str) -> tuple[str, str]:
+    """Use Claude Haiku to generate a session handoff document."""
+    client = anthropic.Anthropic(api_key=api_key)
+    project_name = Path(cwd).name
+    date = datetime.now().strftime("%Y-%m-%d")
+    platform = sys.platform
+
+    prompt = HANDOFF_TEMPLATE.format(
+        project_name=project_name,
+        trigger=trigger,
+        cwd=cwd,
+        conversation=conversation,
+        date=date,
+        platform=platform
+    )
+
+    try:
+        response = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=4000,
+            metadata={"user_id": "mother-claude-hooks"},
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        content = response.content[0].text
+        short_title = extract_short_title(content)
+        content = remove_short_title_line(content)
+
+        return content.strip(), short_title
+
+    except Exception as e:
+        print(f"Error calling Claude API: {e}", file=sys.stderr)
+        fallback = f"# Session Handoff (Auto-generated - API Error)\n\nError: {e}\n\nTrigger: {trigger}\nProject: {project_name}"
+        return fallback, "error"
+
+
+def main():
+    try:
+        hook_input = json.load(sys.stdin)
+    except json.JSONDecodeError as e:
+        print(f"Error parsing hook input: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    session_id = hook_input.get("session_id", "unknown")
+    transcript_path = hook_input.get("transcript_path", "")
+    cwd = hook_input.get("cwd", os.getcwd())
+    hook_event = hook_input.get("hook_event_name", "unknown")
+    trigger = hook_input.get("trigger", hook_event)
+
+    api_key = get_api_key()
+    conversation = parse_transcript(transcript_path)
+
+    if not conversation:
+        print("No conversation content found, skipping handoff generation")
+        sys.exit(0)
+
+    handoff_content, short_title = generate_handoff(conversation, cwd, trigger, api_key)
+
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M")
+    filename = f"{timestamp}-{short_title}.md"
+
+    handoff_dir = find_handoff_directory(cwd)
+    output_path = handoff_dir / filename
+
+    try:
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(handoff_content)
+        print(f"Session handoff saved to: {output_path}")
+    except Exception as e:
+        print(f"Error saving handoff: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

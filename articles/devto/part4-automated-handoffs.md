@@ -465,6 +465,29 @@ Requires an Anthropic API key and internet connection. If the API is down, the h
 
 ---
 
+## How This Works with Agents
+
+If you're using Claude Code's Task tool to spawn subagents (Explore, Plan, etc.), here's what you need to know:
+
+| Event | Hook Fires? | Why |
+|-------|-------------|-----|
+| Main session starts | ✅ SessionStart | Loads previous handoff |
+| Subagent spawned | ❌ None | Subagents are subprocesses, not new sessions |
+| Subagent finishes | ❌ None* | Results return to main session |
+| Main session ends | ✅ SessionEnd | Generates handoff including subagent work |
+
+**This is actually the right behavior:**
+
+1. The main session is the orchestrator—it has context and makes decisions
+2. Subagents are workers—they do specific tasks and report back
+3. The main session's handoff captures *everything*, including what subagents accomplished
+
+You don't need separate handoffs for subagents because their work flows back to the main session. When the main session's handoff gets generated, it includes the full picture.
+
+*\*Claude Code does have a `SubagentStop` hook if you want to capture subagent completions separately, but for most workflows the main session handoff is sufficient.*
+
+---
+
 ## Bonus Hook #1: Auto-Load Previous Handoffs
 
 Writing handoffs is half the equation. The other half: making sure Claude *reads* them.

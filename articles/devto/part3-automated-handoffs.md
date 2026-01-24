@@ -417,6 +417,28 @@ Even with multiple sessions per day, the monthly cost is negligible compared to 
 
 **Pro tip**: Create a separate API key for hooks. The Anthropic console shows usage per key, so you can track exactly how much your automated handoffs cost.
 
+### Choosing a Model
+
+As of this writing, we use Claude Haiku (`claude-3-haiku-20240307`) for handoff generation. It's cheap, fast, and good enough for structured summarization.
+
+| Model | Cost per Handoff | Speed | When to Use |
+|-------|-----------------|-------|-------------|
+| Haiku | ~$0.02 | Fast | Default choice - summarization doesn't need genius |
+| Sonnet | ~$0.15 | Medium | If you want richer, more nuanced summaries |
+| Opus | ~$1+ | Slower | Overkill for handoffs - save it for real work |
+
+To change models, edit `session_handoff.py`:
+
+```python
+# Default
+model="claude-3-haiku-20240307"
+
+# For richer summaries (costs more)
+model="claude-sonnet-4-20250514"
+```
+
+Anthropic releases new models regularly. Check [docs.anthropic.com](https://docs.anthropic.com) for the latest model IDs. The hook script in our repo uses Haiku, but swap in whatever model suits your needs and budget.
+
 ---
 
 ## Extending the System

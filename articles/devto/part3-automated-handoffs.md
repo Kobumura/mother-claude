@@ -4,14 +4,14 @@ published: false
 description: How we used Claude Code hooks to automate session handoffs, context loading, and permission approvals—turning manual discipline into invisible infrastructure.
 tags: ai, automation, productivity, developerexperience
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part4-automated-handoffs.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part3-automated-handoffs.md
 ---
 
 > **TL;DR**: We built three hooks that automate the Mother CLAUDE workflow: (1) auto-generate session handoffs on context compaction, (2) load previous handoffs at session start, and (3) auto-approve safe operations. Manual discipline becomes invisible infrastructure.
 
 *Who this is for: Anyone who wants AI memory that doesn't depend on human discipline. Anyone tired of clicking "yes" to approve safe operations.*
 
-**Part 4 of the Designing AI Teammates series.** Part 1 covered documentation structure. Part 2 covered why session handoffs matter. Part 3 covered quality checkpoints. This one covers automating the entire workflow with hooks.
+**Part 3 of the Designing AI Teammates series.** Part 1 covered documentation structure. Part 2 covered why session handoffs matter. This one covers automating the workflow with hooks. Part 4 will cover quality checkpoints.
 
 ---
 

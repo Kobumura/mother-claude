@@ -11,7 +11,7 @@ canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devt
 
 *Who this is for: Anyone who's noticed their AI assistant has good ideas but doesn't voice them unless asked. Anyone who wants AI collaboration, not just AI assistance.*
 
-**Part 5 of the Designing AI Teammates series.** Part 1 covered documentation structure. Part 2 covered session memory. Part 3 covered quality checkpoints. Part 4 covered automating handoffs. This one covers something subtler: how documentation shapes the *relationship*, not just the *context*.
+**Part 5 of the Designing AI Teammates series.** Part 1 covered documentation structure. Part 2 covered session memory. Part 3 covered automating with hooks. Part 4 covered quality checkpoints. This one covers something subtler: how documentation shapes the *relationship*, not just the *context*.
 
 ---
 

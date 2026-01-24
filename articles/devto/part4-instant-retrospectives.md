@@ -4,14 +4,14 @@ published: false
 description: How we made Claude responsible for initiating quality checkpoints at every commit and PR—so humans don't have to remember.
 tags: ai, codequality, productivity, devops
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part3-instant-retrospectives.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part4-instant-retrospectives.md
 ---
 
 > **TL;DR**: Instead of retrospectives at the end of sprints (when problems have compounded), we run quality checkpoints at every PR and commit. One meta question drives everything: "If I had to hand this codebase to a new developer tomorrow, would they understand it without me explaining anything?"
 
 *Who this is for: Any engineering team tired of technical debt accumulating faster than they can pay it down. Works with any language, framework, or AI tool.*
 
-**Part 3 of the Designing AI Teammates series.** Part 1 covered onboarding with Mother CLAUDE. Part 2 covered session handoffs for persistent memory. This one covers the final step: assigning the AI responsibility for initiating quality conversations, so standards don't decay under human fatigue.
+**Part 4 of the Designing AI Teammates series.** Part 1 covered documentation structure. Part 2 covered session handoffs. Part 3 covered automating everything with hooks. This one covers quality checkpoints: assigning the AI responsibility for initiating quality conversations, so standards don't decay under human fatigue.
 
 ---
 
@@ -367,6 +367,32 @@ Start alone. If it makes your code better, others will notice. If it doesn't, st
 5. **Iterate** based on what patterns you catch
 
 You don't need buy-in from your whole team. You don't need a new tool. You just need to ask better questions at natural stopping points.
+
+---
+
+## Bonus: Automate It with Hooks
+
+If you read Part 3 (Automating Everything with Hooks), you might be wondering: can we automate instant retrospectives too?
+
+**Yes.** The same hooks that auto-generate session handoffs can trigger retrospective prompts:
+
+```json
+"SessionEnd": [
+  {
+    "hooks": [
+      {"type": "command", "command": "python ~/.claude/hooks/session_handoff.py"},
+      {"type": "command", "command": "python ~/.claude/hooks/retro_prompt.py"}
+    ]
+  }
+]
+```
+
+The `retro_prompt.py` hook could:
+- Output the accountability question to stdout
+- Remind Claude to run the checkpoint checklist
+- Create a Jira ticket for any debt identified
+
+This turns the instant retrospective from "Claude should do this" to "Claude will automatically do this." The hook system from Part 3 makes the quality system from Part 4 inevitable rather than aspirational.
 
 ---
 

@@ -699,7 +699,9 @@ We've included a smoke-tested Node.js version (`session_handoff.js`) in the repo
 - Install: `npm install @anthropic-ai/sdk`
 - Update settings.json to use `node` instead of `python`
 
-The Python version is our primary, daily-driver implementation. The Node version is provided as an alternative—if you find issues, please contribute fixes back to the repo!
+The Python version is our primary, daily-driver implementation. Only the main handoff script has a Node version—the simpler scripts (`session_start.py`, `auto_approve.py`) are Python-only but straightforward to port.
+
+**Contributions welcome!** If you create Node versions of the other scripts, find bugs, improve the templates, or have ideas—we'd love PRs. This is a community resource.
 
 ---
 

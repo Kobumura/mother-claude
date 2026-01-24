@@ -17,7 +17,7 @@ If you don't have Python installed:
 
 ### Node.js Alternative
 
-We've included a Node.js version (`session_handoff.js`) that's been smoke tested. If you prefer Node:
+We've included a Node.js version of the main script (`session_handoff.js`) that's been smoke tested. If you prefer Node:
 
 ```bash
 npm install @anthropic-ai/sdk
@@ -25,7 +25,9 @@ npm install @anthropic-ai/sdk
 
 Update `settings.json` to use `node ~/.claude/hooks/session_handoff.js` instead of Python.
 
-**Note:** The Python version is our primary/tested version. The Node version is provided as an alternative - if you find issues, please contribute fixes back to the repo!
+**Note:** Only `session_handoff.js` has a Node version. The other scripts (`session_start.py`, `auto_approve.py`) are Python-only but simple enough to port if needed.
+
+**Contributions welcome!** If you create Node versions of the other scripts, find bugs, or have improvements - please open a PR!
 
 ## Quick Setup
 

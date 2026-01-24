@@ -364,33 +364,55 @@ This isn't just automation—it's AI infrastructure supporting AI collaboration.
 
 ---
 
-## Why Two Triggers?
+## Why Two Triggers? (And the Bug We Found)
 
-### PreCompact (auto)
+Our first implementation used two triggers:
 
-Fires when context is about to be compressed. This is critical because:
-- Context compression loses detail
-- The full conversation is still available at this point
-- Handoff captures everything *before* information is lost
+| Trigger | When | Why |
+|---------|------|-----|
+| **PreCompact** | Context about to compress | Capture everything before detail is lost |
+| **SessionEnd** | Session closes | Ensure final state is captured |
 
-### SessionEnd
+Simple, right? Both triggers run the same script. What could go wrong?
 
-Fires when you close Claude Code. This ensures:
-- Final state is always captured
-- Even short sessions get documented
-- No session ends without a handoff
+### The Problem We Discovered
 
-**Both triggers run the same script.** The handoff includes the trigger type so you can see what caused it:
+A reader (okay, it was us during testing) noticed a flaw:
 
-```markdown
-**Trigger**: auto (context compression)
+1. **PreCompact fires** → Rich, detailed handoff saved
+2. **Context compresses** → Detail lost
+3. **SessionEnd fires** → *Second* handoff saved (thinner, post-compression)
+4. **Next session starts** → SessionStart loads the *most recent* handoff
+5. **Oops** → You loaded the thin SessionEnd handoff, not the rich PreCompact one
+
+**The good handoff got buried by the thin one.**
+
+### The Fix: Smart Deduplication
+
+We updated the script to track state:
+
+```python
+# PreCompact: save marker with transcript size
+save_handoff_state(session_id, transcript_size)
+
+# SessionEnd: check if PreCompact already ran
+if should_skip_handoff(session_id, current_size, trigger):
+    cleanup_state(session_id)
+    sys.exit(0)  # Skip - no new work since PreCompact
 ```
 
-or
+The logic:
+- **PreCompact** always generates a handoff and saves the transcript size
+- **SessionEnd** checks: did PreCompact already run? Did the transcript grow significantly (>10%)?
+  - If no significant new work → skip
+  - If new work happened after compact → generate new handoff
 
-```markdown
-**Trigger**: SessionEnd
-```
+This handles all scenarios:
+- Compact then close immediately → SessionEnd skips (PreCompact got it)
+- Compact, more work, then close → SessionEnd generates (new work to capture)
+- Short session, just close → SessionEnd generates (only trigger)
+
+**The lesson: test your hooks end-to-end.** The obvious solution (two triggers, same script) had a subtle interaction problem.
 
 ---
 
@@ -664,12 +686,20 @@ Here's what we built:
 
 ## The Setup Checklist
 
-1. [ ] **Install Python** with `anthropic` package
+1. [ ] **Install Python 3.8+** and the `anthropic` package (`pip install anthropic`)
 2. [ ] **Copy hook scripts** to `~/.claude/hooks/`
 3. [ ] **Configure hooks** in `~/.claude/settings.json`
 4. [ ] **Set API key** as environment variable
 5. [ ] **Restart terminal** (hooks load at session start)
 6. [ ] **Verify** by starting a new session and checking for previous handoff
+
+### Prefer Node.js?
+
+We've included a smoke-tested Node.js version (`session_handoff.js`) in the repo. If you prefer Node:
+- Install: `npm install @anthropic-ai/sdk`
+- Update settings.json to use `node` instead of `python`
+
+The Python version is our primary, daily-driver implementation. The Node version is provided as an alternative—if you find issues, please contribute fixes back to the repo!
 
 ---
 

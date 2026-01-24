@@ -5,9 +5,31 @@ Automation hooks for Claude Code that provide:
 - **Session context loading** at session start
 - **Auto-approval** of safe operations to reduce permission fatigue
 
+## Prerequisites
+
+- **Python 3.8+** - The hooks are written in Python (primary/tested)
+- **Anthropic API key** - For the handoff summarization (uses Claude Haiku)
+
+If you don't have Python installed:
+- **Windows**: `winget install Python.Python.3.12` or download from [python.org](https://www.python.org/downloads/)
+- **Mac**: `brew install python` or download from [python.org](https://www.python.org/downloads/)
+- **Linux**: `sudo apt install python3` (Ubuntu/Debian) or equivalent
+
+### Node.js Alternative
+
+We've included a Node.js version (`session_handoff.js`) that's been smoke tested. If you prefer Node:
+
+```bash
+npm install @anthropic-ai/sdk
+```
+
+Update `settings.json` to use `node ~/.claude/hooks/session_handoff.js` instead of Python.
+
+**Note:** The Python version is our primary/tested version. The Node version is provided as an alternative - if you find issues, please contribute fixes back to the repo!
+
 ## Quick Setup
 
-### 1. Install Dependencies
+### 1. Install the Anthropic SDK
 
 ```bash
 pip install anthropic

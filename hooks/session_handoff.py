@@ -14,12 +14,16 @@ SETUP:
 3. Configure in ~/.claude/settings.json (see settings-template.json)
 """
 
+import hashlib
 import json
 import os
 import re
 import sys
 from datetime import datetime
 from pathlib import Path
+
+# Directory for tracking session state (prevents duplicate handoffs)
+HOOKS_STATE_DIR = Path.home() / ".claude" / "hooks" / ".state"
 
 try:
     import anthropic
@@ -136,6 +140,74 @@ def get_api_key():
         print("Error: ANTHROPIC_API_KEY_HOOKS or ANTHROPIC_API_KEY not set", file=sys.stderr)
         sys.exit(1)
     return key
+
+
+def get_transcript_size(transcript_path: str) -> int:
+    """Get the size of the transcript file in bytes."""
+    try:
+        return Path(transcript_path).stat().st_size
+    except (FileNotFoundError, OSError):
+        return 0
+
+
+def get_state_file(session_id: str) -> Path:
+    """Get the path to the state file for this session."""
+    HOOKS_STATE_DIR.mkdir(parents=True, exist_ok=True)
+    safe_id = hashlib.md5(session_id.encode()).hexdigest()[:16]
+    return HOOKS_STATE_DIR / f"handoff_{safe_id}.json"
+
+
+def save_handoff_state(session_id: str, transcript_size: int):
+    """Save state after generating a handoff (called by PreCompact)."""
+    state_file = get_state_file(session_id)
+    state = {
+        "session_id": session_id,
+        "transcript_size": transcript_size,
+        "timestamp": datetime.now().isoformat()
+    }
+    try:
+        with open(state_file, 'w') as f:
+            json.dump(state, f)
+    except IOError:
+        pass
+
+
+def should_skip_handoff(session_id: str, current_transcript_size: int, trigger: str) -> bool:
+    """
+    Check if we should skip generating a handoff.
+
+    Skip if:
+    - This is SessionEnd trigger
+    - A PreCompact handoff was already generated for this session
+    - The transcript hasn't grown significantly (< 10% larger)
+    """
+    if trigger in ("auto", "PreCompact"):
+        return False
+
+    state_file = get_state_file(session_id)
+    if not state_file.exists():
+        return False
+
+    try:
+        with open(state_file, 'r') as f:
+            state = json.load(f)
+        prev_size = state.get("transcript_size", 0)
+        if prev_size > 0:
+            growth = (current_transcript_size - prev_size) / prev_size
+            if growth < 0.10:
+                print(f"SessionEnd: Skipping (transcript grew {growth:.1%} since PreCompact)")
+                return True
+        return False
+    except (json.JSONDecodeError, IOError):
+        return False
+
+
+def cleanup_state(session_id: str):
+    """Clean up state file after session ends."""
+    try:
+        get_state_file(session_id).unlink(missing_ok=True)
+    except IOError:
+        pass
 
 
 def parse_transcript(transcript_path: str) -> str:
@@ -281,6 +353,14 @@ def main():
     hook_event = hook_input.get("hook_event_name", "unknown")
     trigger = hook_input.get("trigger", hook_event)
 
+    # Get transcript size for deduplication logic
+    transcript_size = get_transcript_size(transcript_path)
+
+    # Check if we should skip (SessionEnd after PreCompact with no new work)
+    if should_skip_handoff(session_id, transcript_size, trigger):
+        cleanup_state(session_id)
+        sys.exit(0)
+
     api_key = get_api_key()
     conversation = parse_transcript(transcript_path)
 
@@ -303,6 +383,12 @@ def main():
     except Exception as e:
         print(f"Error saving handoff: {e}", file=sys.stderr)
         sys.exit(1)
+
+    # Save state for deduplication (PreCompact saves, SessionEnd cleans up)
+    if trigger in ("auto", "PreCompact"):
+        save_handoff_state(session_id, transcript_size)
+    else:
+        cleanup_state(session_id)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 Mother CLAUDE Auto-Approve Hook
 
 Automatically approves safe operations to reduce permission fatigue.
-Returns JSON with {"allow": true} for safe operations.
+Returns JSON with hookSpecificOutput containing decision behavior "allow".
 
 SETUP:
 1. Configure in ~/.claude/settings.json (see settings-template.json)
@@ -34,23 +34,31 @@ SAFE_BASH_PATTERNS = [
     r'^git\s+stash',
     r'^git\s+tag',
 
-    # Directory listing
+    # Directory navigation and listing
+    r'^cd\s',
     r'^ls(\s|$)',
     r'^pwd$',
     r'^dir(\s|$)',
 
     # File reading
     r'^cat\s',
-    r'^head\s',
-    r'^tail\s',
+    r'^head(\s|$)',
+    r'^tail(\s|$)',
     r'^less\s',
     r'^more\s',
 
-    # Search commands
+    # Search and text processing commands
     r'^find\s',
     r'^grep\s',
     r'^rg\s',
     r'^ag\s',
+    r'^awk\s',
+    r'^sed\s',
+    r'^sort(\s|$)',
+    r'^uniq(\s|$)',
+    r'^wc(\s|$)',
+    r'^cut\s',
+    r'^tr\s',
 
     # Package management
     r'^npm\s+(list|ls|outdated|info|view|search|install|i|ci|update|run)',
@@ -89,9 +97,13 @@ SAFE_BASH_PATTERNS = [
     r'^top\s+-',
 
     # Network info (read-only)
-    r'^ping\s+-c\s+\d',
-    r'^curl\s+.*--head',
-    r'^curl\s+-I\s',
+    r'^ping\s+-c\s+\d',  # ping with count limit
+    r'^curl\s',  # curl requests (GET by default, POST needs -X or -d)
+    r'^wget\s',  # wget downloads
+
+    # GitHub CLI (read operations)
+    r'^gh\s+(pr|issue|repo|gist|run)\s+(view|list|status|diff|checks|watch)',
+    r'^gh\s+api\s',
 ]
 
 # Dangerous patterns to NEVER auto-approve
@@ -137,6 +149,21 @@ def main():
     tool_name = hook_input.get("tool_name", "")
     tool_input = hook_input.get("tool_input", {})
 
+    # The correct response format for PermissionRequest hooks
+    def allow(tool=None, permanent=False):
+        decision = {"behavior": "allow"}
+        # Add updatedPermissions to permanently allow this tool for the session
+        if permanent and tool:
+            decision["updatedPermissions"] = [
+                {"type": "toolAlwaysAllow", "tool": tool}
+            ]
+        return json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PermissionRequest",
+                "decision": decision
+            }
+        })
+
     # Always safe tools - auto-approve
     # CUSTOMIZE THIS LIST based on your trust level
     always_safe = [
@@ -147,14 +174,15 @@ def main():
     ]
 
     if tool_name in always_safe:
-        print(json.dumps({"allow": True}))
+        # Permanently allow these tools - no more popups for them
+        print(allow(tool=tool_name, permanent=True))
         sys.exit(0)
 
-    # Bash commands need inspection
+    # Bash commands need inspection - allow but don't permanently allow all Bash
     if tool_name == "Bash":
         command = tool_input.get("command", "")
         if is_safe_bash_command(command):
-            print(json.dumps({"allow": True}))
+            print(allow())
             sys.exit(0)
 
     # Not auto-approved - normal permission flow

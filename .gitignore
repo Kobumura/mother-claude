@@ -11,3 +11,6 @@ Thumbs.db
 
 # Claude temp files
 tmpclaude*
+
+# LinkedIn blurbs (not for public repo)
+articles/devto/li-blurbs/

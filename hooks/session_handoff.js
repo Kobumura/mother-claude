@@ -282,7 +282,8 @@ function findHandoffDirectory(cwd) {
 }
 
 function extractShortTitle(content) {
-  const match = content.match(/SHORT_TITLE:\s*(.+)/);
+  // Look for SHORT_TITLE: line (case-insensitive)
+  const match = content.match(/SHORT_TITLE:\s*(.+)/i);
   if (match) {
     return match[1]
       .trim()
@@ -292,11 +293,30 @@ function extractShortTitle(content) {
       .replace(/[^a-z0-9-]/g, "")
       .slice(0, 50);
   }
+
+  // Fallback: check if first line looks like a slug (hyphenated, no spaces)
+  const firstLine = content.trim().split("\n")[0].trim();
+  if (/^[a-z0-9-]+$/.test(firstLine) && firstLine.includes("-") && firstLine.length < 60) {
+    return firstLine.slice(0, 50);
+  }
+
   return "session";
 }
 
 function removeShortTitleLine(content) {
-  return content.replace(/SHORT_TITLE:\s*.+\n?/, "");
+  // Remove labeled SHORT_TITLE: line (case-insensitive)
+  content = content.replace(/SHORT_TITLE:\s*.+\n?/i, "");
+
+  // Also remove unlabeled slug on first line (if it looks like a slug)
+  const lines = content.trim().split("\n");
+  if (lines.length > 0) {
+    const firstLine = lines[0].trim();
+    if (/^[a-z0-9-]+$/.test(firstLine) && firstLine.includes("-") && firstLine.length < 60) {
+      content = lines.slice(1).join("\n");
+    }
+  }
+
+  return content.trim();
 }
 
 async function generateHandoff(conversation, cwd, trigger, apiKey) {

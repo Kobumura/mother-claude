@@ -24,7 +24,7 @@ Most teams do retrospectives:
 
 The result: Technical debt accumulates in the gaps between retrospectives. By the time anyone notices, patterns have spread, workarounds have become load-bearing, and "we'll fix it later" has become permanent.
 
-**Our wake-up call**: A React Native app that had passed through multiple development teams over several years. Each team added features without asking hard questions. The codebase became so fragile that upgrading React Native versions became impossible—we tried for weeks, failed, and eventually decided a greenfield rebuild was faster than fixing the mess.
+**Our wake-up call**: A React Native app that had passed through multiple development teams over several years. Each team added features without asking hard questions. The codebase became so fragile that upgrading React Native versions became impossible—we tried for weeks, pulled our hair out as every step forward resulted in two steps backward, and eventually decided a greenfield rebuild was faster than fixing the mess. (Admittedly, it also leant itself very nicely to a business decision requiring the codebase to be optimized for white label distribution, but I digress!)
 
 We didn't want to repeat that with the new codebase.
 

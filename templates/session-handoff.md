@@ -50,6 +50,17 @@
 
 ---
 
+## 🐛 Solved Gotchas
+
+Problems we hit and solved this session — so the next session doesn't waste time re-discovering the same fix.
+
+- **Problem**: [What went wrong / what was confusing]
+  - **Root cause**: [Why it happened]
+  - **Fix**: [What solved it]
+  - **Time lost**: [How long we spent on this — motivates documenting it]
+
+---
+
 ## ⚡ Immediate Next Steps
 
 1. [ ] [Clear, actionable task with ticket ref if applicable]

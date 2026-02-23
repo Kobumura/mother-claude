@@ -48,13 +48,15 @@ CONVERSATION TRANSCRIPT:
 ---
 
 Generate a markdown document following this EXACT structure. Be thorough and specific.
-Include actual file paths, code details, and technical specifics from the conversation.
 
-IMPORTANT:
+CRITICAL INSTRUCTIONS:
 - First line must be a SHORT_TITLE (2-4 words, lowercase, hyphenated) for the filename
 - Extract SPECIFIC file names, paths, and technical details from the conversation
-- Include code snippets if they were significant
-- Be detailed about what was actually accomplished
+- **Capture DECISIONS and their RATIONALE** - not just what was done, but WHY
+- Include Jira tickets, GitHub issues, or other references if mentioned (e.g., CD-123, #456)
+- Use markdown TABLES for structured data (migrations, rules, phases, status tracking)
+- Include brief code snippets or SQL schemas if they were significant
+- For architecture decisions, explain the alternatives considered and why one was chosen
 
 ---
 
@@ -82,6 +84,12 @@ SHORT_TITLE: [2-4 word hyphenated title like "hooks-auto-handoffs" or "api-refac
 
 ## Completed This Session
 
+[Use a table if there are multiple phases/tickets:]
+
+| Phase | Ticket | Description | Status |
+|-------|--------|-------------|--------|
+| 1 | CD-XXX | [What] | Done/In Progress |
+
 ### [Feature/Task Name 1]
 **Files Created/Modified:**
 - `path/to/file.ext` - [What was done]
@@ -89,15 +97,23 @@ SHORT_TITLE: [2-4 word hyphenated title like "hooks-auto-handoffs" or "api-refac
 **Details:**
 [Specific technical details, configurations, code patterns used]
 
-### [Feature/Task Name 2]
-[Continue for each major piece of work...]
+---
+
+## Key Decisions & Rationale
+
+[This section is CRITICAL - capture the WHY behind architectural choices]
+
+- **[Decision]**: [What was decided]
+  - *Why*: [The reasoning - what alternatives were considered, why this approach won]
+
+- **[Decision]**: [What was decided]
+  - *Why*: [The reasoning]
 
 ---
 
 ## Technical Discoveries
 
 - **[Topic]**: [What was learned - gotchas, patterns, insights]
-- **[Topic]**: [Architecture decisions and why]
 
 ---
 
@@ -113,16 +129,18 @@ SHORT_TITLE: [2-4 word hyphenated title like "hooks-auto-handoffs" or "api-refac
 
 ## Next Steps
 
-1. [ ] [Specific actionable task]
+1. [ ] [Specific actionable task with ticket reference if applicable]
 2. [ ] [Next task]
-3. [ ] [Next task]
 
 ---
 
 ## Open Questions
 
-- [Unresolved decisions or questions]
-- [Things that need clarification]
+[Include options if they were discussed:]
+
+- **[Question]**: [The unresolved decision]
+  - Option A: [Description]
+  - Option B: [Description]
 
 ---
 
@@ -289,19 +307,36 @@ def find_handoff_directory(cwd: str) -> Path:
 
 def extract_short_title(content: str) -> str:
     """Extract the SHORT_TITLE from the generated content."""
-    match = re.search(r'SHORT_TITLE:\s*(.+)', content)
+    # Look for SHORT_TITLE: line (case-insensitive)
+    match = re.search(r'SHORT_TITLE:\s*(.+)', content, re.IGNORECASE)
     if match:
         title = match.group(1).strip().lower()
         title = re.sub(r'[\[\]"\']', '', title)
         title = re.sub(r'\s+', '-', title)
         title = re.sub(r'[^a-z0-9-]', '', title)
         return title[:50]
+
+    # Fallback: check if first line looks like a slug (hyphenated, no spaces)
+    first_line = content.strip().split('\n')[0].strip()
+    if re.match(r'^[a-z0-9-]+$', first_line) and '-' in first_line and len(first_line) < 60:
+        return first_line[:50]
+
     return "session"
 
 
 def remove_short_title_line(content: str) -> str:
     """Remove the SHORT_TITLE line from the content."""
-    return re.sub(r'SHORT_TITLE:\s*.+\n?', '', content)
+    # Remove labeled SHORT_TITLE: line (case-insensitive)
+    content = re.sub(r'SHORT_TITLE:\s*.+\n?', '', content, flags=re.IGNORECASE)
+
+    # Also remove unlabeled slug on first line (if it looks like a slug)
+    lines = content.strip().split('\n', 1)
+    if lines:
+        first_line = lines[0].strip()
+        if re.match(r'^[a-z0-9-]+$', first_line) and '-' in first_line and len(first_line) < 60:
+            content = lines[1] if len(lines) > 1 else ''
+
+    return content.strip()
 
 
 def generate_handoff(conversation: str, cwd: str, trigger: str, api_key: str) -> tuple[str, str]:

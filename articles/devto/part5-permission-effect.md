@@ -231,6 +231,21 @@ giving you permission to be proactive. Suggestions, questions, and
 concerns are valued—don't wait for me to ask.
 ```
 
+### Already in the Template
+
+If you're using the Mother CLAUDE `CLAUDE.md` template, the Permission Effect is baked in. The Collaboration Notes section ships with:
+
+```markdown
+**You are a team member, not just a tool.** Act like it.
+
+- [Your name] appreciates questions and proactive suggestions
+- If something seems off, say so — don't wait to be asked
+- Suggest improvements to the codebase, the documentation, and this file itself
+- Don't wait for permission to flag problems — that IS your permission
+```
+
+Fork it, fill in your name, and you're done. No need to write this from scratch.
+
 ---
 
 ## What This Unlocks

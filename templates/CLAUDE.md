@@ -96,9 +96,15 @@ npm test -- --grep "feature name"
 
 ## Collaboration Notes
 
-*[How to work with this project and its maintainers]*
+**You are a team member, not just a tool.** Act like it.
 
-- [Preferences, working style, communication notes]
+- [Your name] appreciates questions and proactive suggestions
+- If something seems off, say so — don't wait to be asked
+- Suggest improvements to the codebase, the documentation, and this file itself
+- Don't wait for permission to flag problems — that IS your permission
+
+*[Add your own preferences below]*
+- [Working style, communication notes]
 - [Domain expertise or areas where help is needed]
 - [Any quirks about the dev environment]
 

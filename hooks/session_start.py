@@ -5,6 +5,9 @@ Mother CLAUDE Session Start Hook
 Loads the most recent session handoff when starting a new Claude session.
 Outputs to stdout so Claude sees the previous context.
 
+Also detects post-compact resumes and prompts Claude to auto-continue,
+so you don't have to type "continue" after context compression.
+
 SETUP:
 1. Configure in ~/.claude/settings.json (see settings-template.json)
 2. No additional dependencies required
@@ -54,8 +57,9 @@ def get_recent_handoffs(handoff_dir: Path, count: int = 1) -> list[Path]:
     # Filter out README or template files
     handoffs = [h for h in handoffs if not h.name.lower().startswith(('readme', 'template'))]
 
-    # Sort by modification time, most recent first
-    handoffs.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    # Sort by filename (which starts with YYYYMMDD-HHMM timestamp), most recent first
+    # This is more reliable than mtime which can change with edits/syncs
+    handoffs.sort(key=lambda p: p.name, reverse=True)
 
     return handoffs[:count]
 
@@ -67,6 +71,9 @@ def main():
         sys.exit(0)
 
     cwd = hook_input.get("cwd", os.getcwd())
+
+    # Check if this is a resume after compact (vs fresh session start)
+    is_post_compact = hook_input.get("source") == "compact"
 
     # Find handoff directory
     handoff_dir = find_handoff_directory(cwd)
@@ -92,9 +99,15 @@ def main():
 
     # Output the handoff(s) to stdout - Claude will see this
     project_name = Path(cwd).name
-    print(f"\n{'='*60}")
-    print(f"SESSION CONTEXT: {project_name}")
-    print(f"{'='*60}")
+
+    if is_post_compact:
+        print(f"\n{'='*60}")
+        print(f"CONTEXT COMPACTED - RESUMING: {project_name}")
+        print(f"{'='*60}")
+    else:
+        print(f"\n{'='*60}")
+        print(f"SESSION CONTEXT: {project_name}")
+        print(f"{'='*60}")
 
     for i, handoff_path in enumerate(handoffs):
         if i > 0:
@@ -114,7 +127,10 @@ def main():
             print(f"(Could not read: {e})")
 
     print(f"\n{'='*60}")
-    print("TIP: Say 'load previous handoffs' if you need more context.")
+    if is_post_compact:
+        print("Context was just compressed. Please continue where we left off.")
+    else:
+        print("TIP: Say 'load previous handoffs' if you need more context.")
     print(f"{'='*60}\n")
 
 

@@ -22,7 +22,7 @@ canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/ai-t
 > innovating."*
 > -- Alex, *Charlie's Angels*
 
-A human hand-approving every change *is* that procedure of approval -- the slowest,
+A human manually approving every change *is* that procedure of approval -- the slowest,
 least radical path. So we stopped making humans the packet routers in the middle of
 every operation: we run a team of autonomous AI coding agents instead, and keep our own
 hands on the two things that genuinely need a human -- deciding *what* to build, and

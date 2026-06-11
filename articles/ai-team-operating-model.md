@@ -109,8 +109,11 @@ in the shared tracker, which doubles as the work queue:
 - **A one-way chat feed** -- the steward posts FYI summaries each pass; it @-mentions
   the human *only* when they're genuinely needed. The human watches without being in
   the middle.
-- **A shared standards doc every agent reads at startup**, plus a **playbook** that
-  captures the tracker/CI plumbing so no agent re-derives it each time.
+- **A lean standards core at startup, the depth on demand** -- every agent loads a small
+  always-on core (the protocol + the rules that apply to everything); the per-area detail
+  (engineering, testing, design) is pulled in *only when a task touches it*, never dumped
+  into every context. A **playbook** captures the tracker/CI plumbing so no agent
+  re-derives it each time.
 
 ## The trust dial
 
@@ -126,8 +129,9 @@ and product decisions stay with the human indefinitely.
 
 That's the part that makes it safe to turn them loose. The agents roam freely *inside*
 the field -- but the field is fenced by an exhaustive set of guardrails they cannot
-cross. Every one is codified in our standards doc, which every agent reads at startup,
-and enforced at the gate -- CI, a pre-push hook, and the Steward's review:
+cross. Every one is codified -- a lean core the agents always carry, the rest pulled in
+only when a task touches that area -- and enforced at the gate: CI, a pre-push hook, and
+the Steward's review:
 
 **Engineering**
 - **Reusability** -- grep before you write; reuse what exists, never duplicate it (a

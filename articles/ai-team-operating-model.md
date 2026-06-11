@@ -1,8 +1,8 @@
 ---
 title: "A Self-Coordinating AI Dev Team: The Operating Model"
 published: false
-description: Point several autonomous AI coding agents at one repo and they collide. The fix isn't smarter agents -- it's an operating model: four roles, the issue tracker as the only coordination layer, and exhaustive guardrails the agents can't cross.
-tags: ai, productivity, automation, developerexperience
+description: Autonomous AI coding agents aren't coordinated by intelligence -- they're coordinated by structure. The operating model behind it: four roles, the issue tracker as the only coordination layer, and guardrails the agents can't cross.
+tags: ai, architecture, systemsthinking, productivity
 series: Designing AI Teammates
 canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/ai-team-operating-model.md
 ---
@@ -22,19 +22,20 @@ canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/ai-t
 > innovating."*
 > -- Alex, *Charlie's Angels*
 
-A human hand-approving every change *is* a procedure of approval that rewards the
-slowest, least radical path. So we retired it: we run a team of autonomous AI coding
-agents that ships software while we stay at the product altitude instead of down in the
-mechanical loop.
+A human hand-approving every change *is* that procedure of approval -- the slowest,
+least radical path. So we stopped making humans the packet routers in the middle of
+every operation: we run a team of autonomous AI coding agents instead, and keep our own
+hands on the two things that genuinely need a human -- deciding *what* to build, and
+confirming it's *right*.
 
-**By the numbers:** in one recent week, our team closed roughly **140 tickets** on a
-single repo -- the bulk of that whole month's output -- while we kept our hands on
-exactly two things: deciding *what* to build, and confirming it was *right*.
+And here's the thesis, with everything below as the proof: **the agents aren't
+coordinated by intelligence -- they're coordinated by structure.**
 
-Here's the thesis, and everything below is just the proof: **the agents aren't
-coordinated by intelligence -- they're coordinated by structure.** What follows is that
-structure -- the roles, the coordination substrate, the guardrails, and the hard-won
-rules. (Companion piece: "What broke the first time we ran three AI workers on one repo.")
+**By the numbers:** in one recent week our team closed roughly **140 tickets** on a
+single repo -- the bulk of a whole month's output -- while we stayed at that product
+altitude. What follows is the structure that makes it hold: the roles, the coordination
+substrate, the guardrails, and the hard-won rules. (Companion piece: "What broke the
+first time we ran three AI workers on one repo.")
 
 ## The core idea
 
@@ -211,8 +212,13 @@ which is the only place they were ever irreplaceable.
 
 ---
 
-Strip away the costumes and it's a familiar shape: a **scrum team** -- a backlog, a board,
-standups by status, reviews, a definition of done. These teammates just resolve their
-differences quickly and quietly, and -- every so often -- get *zapped* by the fence.
+Strip away the costumes and it's a familiar shape: a **scrum team** -- a backlog, a
+board, standups by status, reviews, a definition of done. The teammates just resolve
+their differences quickly and quietly, and -- every so often -- get *zapped* by the
+fence.
 
-*Good work, Angels.*
+But the point was never autonomous coding. The agents write the code; the structure
+keeps them from stepping on each other; the human stays at product altitude -- deciding
+what matters, and confirming it's right. *That's* the operating model.
+
+*Good morning, Angels.*

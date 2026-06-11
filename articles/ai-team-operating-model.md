@@ -223,3 +223,23 @@ keeps them from stepping on each other; the human stays at product altitude -- d
 what matters, and confirming it's right. *That's* the operating model.
 
 *Good morning, Angels.*
+
+---
+
+## Resources
+
+This is part of **Mother CLAUDE** -- an open system for working with AI coding agents.
+It's one public repo, and most of it is just plain markdown you can fork and adapt:
+
+- **GitHub**: [github.com/Kobumura/mother-claude](https://github.com/Kobumura/mother-claude)
+- **The patterns**, as `.md` -- this operating model, the companion field report, a
+  worker-coordination template (`templates/`), and ready-to-use agent definitions (`agents/`).
+- **Working code** -- session hooks (auto-approve, handoff, session-start) under `hooks/`,
+  and a small live multi-AI "roundtable" tool under `tools/`.
+- **Onboarding** -- a drop-in `ONBOARDING-PROMPT.md` to get a fresh agent productive fast.
+
+Fork it, adapt it, or use it as a reference for your own setup.
+
+---
+
+*Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) -- free to use and adapt with attribution to Dorothy J. Aubrey.*

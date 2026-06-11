@@ -31,8 +31,8 @@ confirming it's *right*.
 And here's the thesis, with everything below as the proof: **the agents aren't
 coordinated by intelligence -- they're coordinated by structure.**
 
-**By the numbers:** in one recent week our team closed roughly **140 tickets** on a
-single repo -- the bulk of a whole month's output -- while we stayed at that product
+**By the numbers:** the week we turned the team loose, it closed **137 tickets** on a
+single repo -- against **17** in the three weeks before it. We spent that week at product
 altitude. What follows is the structure that makes it hold: the roles, the coordination
 substrate, the guardrails, and the hard-won rules. (Companion piece: "What broke the
 first time we ran three AI workers on one repo.")

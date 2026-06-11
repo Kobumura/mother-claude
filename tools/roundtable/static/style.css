@@ -1,0 +1,55 @@
+/* roundtable theme -- edit freely to customize the look, then refresh. */
+* { box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+
+/* ---- top bar: AI controls (left) + humans present (right) ---- */
+#roster {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+  background: rgba(17, 24, 39, .9); backdrop-filter: blur(6px);
+  border-bottom: 1px solid #1f2937;
+  padding: 8px 14px; font-size: 13px;
+  display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between;
+}
+.ais, .humans { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* AI control chips: checkbox in/out + cheap|heavy */
+.ai-ctl {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 999px;
+  background: #1e293b; border: 1px solid #334155; cursor: pointer; user-select: none;
+}
+.ai-ctl.off { opacity: .45; }
+.ai-ctl input[type=checkbox] { accent-color: #6366f1; cursor: pointer; margin: 0; }
+.ainame { font-weight: 600; }
+.ai-ctl.Claude .ainame { color: #c4b5fd; }
+.ai-ctl.Gemini .ainame { color: #7dd3fc; }
+.ai-ctl.GPT    .ainame { color: #6ee7b7; }
+.tier { font-size: 11px; padding: 1px 4px; border-radius: 6px; background: #0f172a; color: #cbd5e1; border: 1px solid #334155; cursor: pointer; }
+.nokey { font-size: 11px; color: #64748b; font-style: italic; }
+
+/* human presence pills: bold + green = just joined, italic + dim = just left */
+.who { display: inline-flex; align-items: center; gap: 6px; padding: 3px 11px 3px 9px; border-radius: 999px; background: #1e293b; border: 1px solid #334155; color: #cbd5e1; transition: all .25s; }
+.who .dot { width: 7px; height: 7px; border-radius: 50%; background: #64748b; flex: none; }
+.who.joined { color: #fff; font-weight: 700; border-color: #34d399; }
+.who.joined .dot { background: #34d399; box-shadow: 0 0 0 3px rgba(52, 211, 153, .2); }
+.who.left { font-style: italic; opacity: .4; }
+
+#log { height: calc(100vh - 112px); margin-top: 44px; overflow: auto; padding: 16px; }
+#inner { max-width: 820px; margin: 0 auto; }
+
+.msg { margin: 10px 0; padding: 10px 14px; border-radius: 12px; background: #1e293b; white-space: pre-wrap; line-height: 1.45; }
+.name { font-weight: 700; margin-bottom: 3px; font-size: 13px; }
+.time { color: #64748b; font-weight: 400; font-size: 11px; margin-left: 8px; }
+
+/* per-participant message-name colors */
+.Claude .name { color: #c4b5fd; }
+.Gemini .name { color: #7dd3fc; }
+.GPT    .name { color: #6ee7b7; }
+
+.system { background: transparent; color: #fbbf24; text-align: center; font-style: italic; font-size: 14px; }
+.system .time { color: #a16207; }
+
+#bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 1px solid #334155; padding: 10px; display: flex; gap: 8px; justify-content: center; }
+input, button { font-size: 15px; padding: 10px 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; }
+#text { flex: 1; max-width: 660px; }
+button { background: #6366f1; border: none; cursor: pointer; font-weight: 600; }

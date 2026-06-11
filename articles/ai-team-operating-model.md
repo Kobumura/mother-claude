@@ -199,3 +199,12 @@ judgment goes to the human), and **the fences** (exhaustive guardrails the agent
 cross, independently verified by the Steward). Get those five right and the team mostly
 runs itself — the human moves up to deciding *what* to build and confirming it's good,
 which is the only place they were ever irreplaceable.
+
+---
+
+Strip away the costumes and it's a familiar shape: a **scrum team** — a backlog, a board,
+standups by status, reviews, a definition of done. These teammates just resolve their
+differences quickly and quietly, never call in sick, and — every so often — get *zapped*
+by the fence.
+
+*Good work, Angels.*

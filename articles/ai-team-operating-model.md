@@ -1,5 +1,16 @@
 # A self-coordinating AI dev team: the operating model
 
+![Three silhouetted operatives in the classic Charlie's Angels poses](images/ai-team-angels.jpg)
+
+> *"Your methodologies are antiquated and weak. Your procedures of approval ensure
+> that only the least radical ideas are rewarded. Meanwhile your competition is
+> innovating."*
+> — Alex, *Charlie's Angels*
+
+A human hand-approving every change *is* a procedure of approval that rewards the
+slowest, least radical path. This is how you retire it — a team of agents that runs
+itself, with the human reserved for the two calls only they can make.
+
 How to run a team of autonomous AI coding agents that ships software while keeping
 the human at the product altitude instead of in the mechanical loop. This is the
 durable structure behind it — the roles, the coordination substrate, and the
@@ -26,6 +37,14 @@ the human for the two things only they can do: **deciding what to build** and
 
 The flow in one line: **the planner feeds the queue, the workers drain it, the
 groomer moves it through, and the human decides and verifies.**
+
+> **The cast**, if it helps the roles stick: *"Once upon a time there were three very
+> different little girls who grew up to be three very different women with three things
+> in common: they're brilliant, they're beautiful, and they work for me. My name is
+> Charlie."* The **workers** are the Angels — the operatives who run the missions.
+> **Bosley** is the planner — the handler who briefs them and clears their blockers.
+> **Charlie** is the groomer — the voice you never see, reviewing every finished
+> mission and signing it off: *"Good work, Angels."*
 
 ## The issue tracker is the coordination layer
 

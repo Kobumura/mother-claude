@@ -119,7 +119,6 @@ Turn autonomous agents loose *without* the fences and they don't move slowly -- 
 - **A re-scoped task can be the deferred "part 2"** -- reconcile against the *current* scope (description + recent comments), not merely "does a commit exist."
 - **Never merge work that's missing its required tests.**
 - **One branch per task -- never commit on the worker's idle home branch.**
-- **No AI authorship attribution** in commits/PRs/tasks (a neutral contributor handle is fine).
 
 ## Why it works
 

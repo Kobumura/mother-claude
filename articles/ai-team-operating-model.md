@@ -222,7 +222,7 @@ But the point was never autonomous coding. The agents write the code; the struct
 keeps them from stepping on each other; the human stays at product altitude -- deciding
 what matters, and confirming it's right. *That's* the operating model.
 
-*Good morning, Angels.*
+*Good work, Angels.*
 
 ---
 

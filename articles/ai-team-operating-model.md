@@ -9,8 +9,6 @@ canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/ai-t
 
 *Good morning, Angels.*
 
-![Three silhouetted operatives in the classic Charlie's Angels poses](images/ai-team-angels.jpg)
-
 > **TL;DR**: Pointing several autonomous AI agents at one repository doesn't fail because the agents aren't smart enough -- it fails without structure. The structure is an operating model: four roles, the issue tracker as the *only* coordination layer, the human kept at the product altitude, and an exhaustive set of guardrails the agents can't cross -- adhered to by the workers *and* independently double-checked by the Steward. Here's the whole thing.
 
 *Who this is for: anyone running -- or about to run -- more than one AI coding agent at a time, and wondering how to keep them from colliding or shipping confident nonsense.*
@@ -131,6 +129,8 @@ Strip away the costumes and it's a familiar shape: a **scrum team** -- a backlog
 But the point was never autonomous coding. The agents write the code; the structure keeps them from stepping on each other; the human stays at product altitude -- deciding what matters, and confirming it's right. *That's* the operating model.
 
 *Good work, Angels.*
+
+![Three silhouetted operatives in the classic Charlie's Angels poses](images/ai-team-angels.jpg)
 
 ---
 

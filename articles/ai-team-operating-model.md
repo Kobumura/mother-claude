@@ -204,7 +204,6 @@ which is the only place they were ever irreplaceable.
 
 Strip away the costumes and it's a familiar shape: a **scrum team** — a backlog, a board,
 standups by status, reviews, a definition of done. These teammates just resolve their
-differences quickly and quietly, never call in sick, and — every so often — get *zapped*
-by the fence.
+differences quickly and quietly, and — every so often — get *zapped* by the fence.
 
 *Good work, Angels.*

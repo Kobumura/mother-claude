@@ -1,8 +1,21 @@
-# A self-coordinating AI dev team: the operating model
+---
+title: "A Self-Coordinating AI Dev Team: The Operating Model"
+published: false
+description: Point several autonomous AI coding agents at one repo and they collide. The fix isn't smarter agents — it's an operating model: four roles, the issue tracker as the only coordination layer, and exhaustive guardrails the agents can't cross.
+tags: ai, productivity, automation, developerexperience
+series: Designing AI Teammates
+canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/ai-team-operating-model.md
+---
 
 *Good morning, Angels.*
 
 ![Three silhouetted operatives in the classic Charlie's Angels poses](images/ai-team-angels.jpg)
+
+> **TL;DR**: Pointing several autonomous AI agents at one repository doesn't fail because the agents aren't smart enough — it fails without structure. The structure is an operating model: four roles, the issue tracker as the *only* coordination layer, the human kept at the product altitude, and an exhaustive set of guardrails the agents can't cross — adhered to by the workers *and* independently double-checked by the Steward. Here's the whole thing.
+
+*Who this is for: anyone running — or about to run — more than one AI coding agent at a time, and wondering how to keep them from colliding or shipping confident nonsense.*
+
+**Part of the *Designing AI Teammates* series.**
 
 > *"Your methodologies are antiquated and weak. Your procedures of approval ensure
 > that only the least radical ideas are rewarded. Meanwhile your competition is
@@ -104,6 +117,66 @@ human. As the gates — CI, required tests, self-review, an independent reviewer
 — prove they catch what they should, more work graduates to fully autonomous. Visual
 and product decisions stay with the human indefinitely.
 
+## The electric fences
+
+> The pasture this worker hive grazes in is ringed with electric fences.
+
+That's the part that makes it safe to turn them loose. The agents roam freely *inside*
+the field — but the field is fenced by an exhaustive set of guardrails they cannot
+cross. Every one is codified in a standards doc the agents read at startup and enforced
+at the gate — CI, a pre-push hook, and the Steward's review:
+
+**Engineering**
+- **Reusability** — grep before you write; reuse what exists, never duplicate it (a
+  copy-paste detector fails the build on new duplication).
+- **Separation of concerns** — layer boundaries hold (no service reaching into a
+  screen, no circular dependencies); no god files past a hard line-count cap; no
+  business logic smuggled into the UI.
+- **Type safety** — `strict` on, `any` banned, no unexplained `@ts-ignore`; every
+  external boundary typed.
+- **No dead code, no over-guarding** — nothing unreachable, no defenses against shapes
+  that can't occur.
+
+**Testing**
+- The **required tests ship with the code** — unit, regression, and an end-to-end flow
+  for anything user-facing; never a merge that's missing them.
+- **No zero-assertion tests, no committed `.only`** — a CI guard fails on either.
+- **Mutation testing** on the money-path services — coverage proves execution; the
+  mutation score proves the tests would actually catch a regression.
+- **Contract tests** against the API, so client and server can't drift apart.
+
+**Design**
+- **Design tokens only** — no raw hex, spacing, or font sizes in screens; shared
+  components extracted, not re-implemented.
+- **Accessibility budget** — labels, contrast, and touch targets asserted, not hoped for.
+
+**Security**
+- **No secrets in code** — credentials live in a secret store, encrypted at rest.
+- **Auth patterns are off-limits to casual edits** — OAuth/PKCE/keychain flows;
+  no injection vectors; dependency vulnerabilities scanned on every PR.
+
+**Deployment**
+- **CI green, the right branch, never a shortcut to prod** — and sensitive code (auth,
+  billing, migrations, data-deletion) never auto-merges.
+- **Migrations validated against the live schema** before they run, with a rollback path
+  on file.
+- **Performance budgets** — bundle size and key query counts can't regress silently.
+
+…and the fence line keeps growing: every incident that teaches us a new failure mode
+becomes a new wire the next morning.
+
+And here's the load-bearing part: **the fences aren't left to the grazers to respect on
+the honor system.** The workers adhere to them — *and the Steward independently
+re-verifies that adherence before anything merges.* A worker reports its tests pass, its
+diff reuses the right helper, and the standards hold; the Steward confirms they actually
+do, walking the fence line on every pass. **Adherence is the worker's job; verification
+is the Steward's.** That second, independent check — not the agents' good intentions — is
+what lets the trust dial climb without the work going feral.
+
+Turn autonomous agents loose *without* the fences and they don't move slowly — they move
+fast, confidently, in the wrong direction. The guardrails aren't what slow the team
+down; they're the only reason it's safe to let it run at all.
+
 ## The rules that make it hold
 
 - **Scope in the description, not a comment** — an empty "ready" task is the root
@@ -121,7 +194,8 @@ and product decisions stay with the human indefinitely.
 
 None of this is about making the agents smarter. It's about a **shared source of
 truth** (the tracker), **isolation** (a checkout and branch per agent), **a review
-gate** (PRs + CI), and **a clear escalation path** (objective work flows on its own;
-judgment goes to the human). Get those four right and the team mostly runs itself —
-the human moves up to deciding *what* to build and confirming it's good, which is the
-only place they were ever irreplaceable.
+gate** (PRs + CI), **a clear escalation path** (objective work flows on its own;
+judgment goes to the human), and **the fences** (exhaustive guardrails the agents can't
+cross, independently verified by the Steward). Get those five right and the team mostly
+runs itself — the human moves up to deciding *what* to build and confirming it's good,
+which is the only place they were ever irreplaceable.

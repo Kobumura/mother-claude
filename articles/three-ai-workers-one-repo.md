@@ -20,7 +20,7 @@ single developer, and made it *expensive*.
   earliest claim wins.
 - **Isolation per worker.** Each worker runs in its **own working tree** (its own
   checkout on disk), branches per task, and opens a **pull request** into the
-  shared integration branch. CI runs on the PR; a human/groomer merges.
+  shared integration branch. CI runs on the PR; a human/steward merges.
 - **Handoffs for memory.** When a worker pauses or blocks, it writes a short
   handoff (what's done, where the WIP lives, how to resume) so any worker can pick
   up cold.
@@ -80,7 +80,7 @@ Most of these are cheap — documentation and habit, not infrastructure:
 1. **Reconcile against the code before building.** First action after claiming:
    search the history for the task id and grep for the feature's key symbols. If
    it already shipped, cite the commit and route the task to review — don't
-   rebuild it. *Detection is the worker's job; the final close is the planner's*,
+   rebuild it. *Detection is the worker's job; the final close is the dispatcher's*,
    so a half-done task can't be silently buried as "done."
 2. **Move the task the moment its code lands** — and, the durable version,
    **automate it**: a task reference reaching the integration branch should

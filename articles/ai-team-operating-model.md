@@ -31,9 +31,10 @@ mechanical loop.
 single repo -- the bulk of that whole month's output -- while we kept our hands on
 exactly two things: deciding *what* to build, and confirming it was *right*.
 
-What follows is the durable structure behind that -- the roles, the coordination
-substrate, the guardrails, and the hard-won rules. (Companion piece: "What broke the
-first time we ran three AI workers on one repo.")
+Here's the thesis, and everything below is just the proof: **the agents aren't
+coordinated by intelligence -- they're coordinated by structure.** What follows is that
+structure -- the roles, the coordination substrate, the guardrails, and the hard-won
+rules. (Companion piece: "What broke the first time we ran three AI workers on one repo.")
 
 ## The core idea
 
@@ -199,12 +200,13 @@ down; they're the only reason it's safe to let it run at all.
 
 ## Why it works
 
-None of this is about making the agents smarter. It's about a **shared source of
-truth** (the tracker), **isolation** (a checkout and branch per agent), **a review
-gate** (PRs + CI), **a clear escalation path** (objective work flows on its own;
-judgment goes to the human), and **the fences** (exhaustive guardrails the agents can't
-cross, independently verified by the Steward). Get those five right and the team mostly
-runs itself -- the human moves up to deciding *what* to build and confirming it's good,
+A smarter model doesn't solve coordination -- **structure** does. Verification solves
+trust, isolation solves collision, workflow solves ambiguity. So none of this is about
+making the agents smarter; it's about a **shared source of truth** (the tracker),
+**isolation** (a checkout and branch per agent), **a review gate** (PRs + CI), **a clear
+escalation path** (objective work flows on its own; judgment goes to the human), and
+**the fences** (exhaustive guardrails the agents can't cross, independently verified by
+the Steward). Get those five right and the team mostly runs itself -- the human moves up to deciding *what* to build and confirming it's good,
 which is the only place they were ever irreplaceable.
 
 ---

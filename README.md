@@ -50,6 +50,30 @@ A three-tier documentation system:
 
 4. **Tool-agnostic** - Works with Claude, Cursor, Copilot, or whatever comes next.
 
+## Run an Autonomous AI Team — the Worker System
+
+Beyond documentation, Mother CLAUDE includes a field-tested model for running a **team of
+autonomous AI coding agents** that ship real work while a human stays at product direction. The
+mechanical work — coordinating, reconciling, merging, feeding the queue — runs autonomously
+through your issue tracker; the human only decides *what* to build and verifies it works. In
+production it roughly **doubled per-project throughput with no added engineers**.
+
+Everything you need is in **[`worker-system/`](worker-system/)**:
+
+| File | What it is |
+|---|---|
+| [worker-system/README.md](worker-system/README.md) | **Start here** — package overview + getting-started path |
+| [operating-model.md](worker-system/operating-model.md) | The four roles, the board-as-coordination-layer, the trust model |
+| [agent-worker-protocol.md](worker-system/agent-worker-protocol.md) | The worker rules in full (claim loop, worktree/PR isolation) |
+| [onboarding.md](worker-system/onboarding.md) | Set up a machine to run workers |
+| [team-up.ps1](worker-system/team-up.ps1) | One-command launcher for multiple sessions |
+| [standards/](worker-system/standards/) | The quality bar the workers enforce |
+| [scripts/team-impact.py](worker-system/scripts/team-impact.py) | Measure the payoff — tickets per active day, before vs. after |
+
+**Five-minute on-ramp:** read `worker-system/README.md` → skim `operating-model.md` → follow
+`onboarding.md` on one machine → launch a couple of workers with `team-up.ps1` → after a week,
+run `team-impact.py` to see your own before/after.
+
 ## Quick Start
 
 1. **Create a shared docs repo** with your organization's standards

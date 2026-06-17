@@ -1,0 +1,5 @@
+# Shell scripts MUST be LF — CRLF breaks them on macOS/Linux ("bad interpreter: ...^M").
+*.sh   text eol=lf
+*.mjs  text eol=lf
+*.py   text eol=lf
+*.ps1  text eol=crlf

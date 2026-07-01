@@ -20,6 +20,36 @@ The key distinction: **authoritative state goes in the tracker/git (persistent,
 atomic at push); chat is only for getting a human's attention.** Don't put claims
 or answers in an ephemeral channel.
 
+## The capability contract (works with any tracker)
+
+Everything here rides on **eight primitives**. Any issue tracker that offers them can
+run this system — GitHub Issues + Projects, Linear, Trello, Monday, Notion, Jira. Map
+each primitive to your tool once (see *Adapting to your tracker*) and the protocol is
+unchanged.
+
+| # | Primitive | What it's for | Your tracker offers it as… |
+|---|-----------|---------------|----------------------------|
+| 1 | **Ordered queue with a "ready" gate** | workers pick only blessed work | a status/column + a `ready` label |
+| 2 | **States that flow left→right** | To Do → Ready → In Progress → Needs Input → In Review → Done (+ a "changes requested" loop-back) | statuses / board columns |
+| 3 | **An atomic claim other agents can read** | stop two workers on one ticket | assignee (+ a claim comment as tiebreak) |
+| 4 | **Durable per-item comments** | handoffs, blocked questions, verify steps, attached to the work | issue comments |
+| 5 | **A tag orthogonal to status, filterable** | peer notes + inbox polling that never lie about the work's state | labels + filter-by-label |
+| 6 | **A query/filter** | pull the queue; poll your inbox tag | saved filter / `list --label` / search |
+| 7 | **Per-agent identity** | know who claimed / reviewed / merged | separate accounts or per-agent tokens |
+| 8 | **A one-way notify channel** | get a human's *attention* (not state) | chat incoming webhook (Slack/Discord/Teams) |
+
+**One of these changes shape with your tracker — the claim (#3).** If all agents run
+under **one shared tracker account**, the assignee field can't tell two workers apart;
+the tiebreak is the **earliest `claim:` comment** and each agent carries a **name**. If
+every agent has its **own identity** (separate accounts, or a tracker with atomic
+assignment like Linear), the claim is simply *"assign it to yourself; if it's already
+assigned, take the next"* — no comment race. Pick the mechanism your identity model
+supports; the rest of the loop is identical.
+
+Primitives 5 and 6 travel together — an inbox tag is only useful if you can **filter by
+it**, and every major tracker can. That makes the peer-coordination label-inbox (below)
+the most portable piece of the whole system.
+
 ## The claim loop
 
 Each worker runs this until the queue is empty:
@@ -61,6 +91,38 @@ The human answers **in the ticket comment**, clears `needs-input`, re-adds the
 ready label. Any worker re-claims it, reads the answer, and continues — the human
 never has to track down a specific session.
 
+## Peer coordination between two lead roles (the orthogonal-tag inbox)
+
+Once you split the human-facing side into two standing roles — a **planner** (specs work
+into Ready) and a **steward** (reviews, merges, keeps the queue flowing) — both roles
+poll the board every loop and sometimes need to leave *each other* a note on a specific
+ticket, without a human relaying it.
+
+**Do NOT do this by moving the ticket's status.** A status is a claim about the *work's*
+state; reusing it as a mailbox makes the status **lie**, and a lying status misfires the
+other role's automation — a note parked in "In Review" gets swept up by the steward's
+"merge the green ones" logic and **merged early**; a note dropped in "Needs Input" is
+indistinguishable from a genuinely blocked ticket.
+
+**Instead use a per-role tag orthogonal to status.** The sender leaves the note as a
+**comment** and adds a label — `needs-planner` / `needs-steward`. The recipient's loop
+runs **one extra query each pass** (`label = needs-<role>`), reads, acts, and **removes
+the label as the "mark-read"** — but only once the note is *fully actioned*, not merely
+seen. The status stays truthful, it's auditable, and it works even when both roles share
+one tracker account (where an assignee field couldn't tell them apart).
+
+Two things make it more than a convenience:
+- **It's the only clean way to reach a *closed* ticket.** You can't signal a done ticket
+  by moving its status without reopening it (which lies about its state); a label +
+  comment leaves the closed record intact.
+- **The inbox query must be status-agnostic.** Filter on the label *alone* — don't also
+  exclude done/closed items, or you'll silently miss notes left on finished tickets.
+  (This is the easy-to-miss part: the first version of one such watch filtered out
+  closed items and dropped every note left on a done ticket.)
+
+Keep the one-way notify channel (above) for what a human needs to see *now*; the
+tag-inbox is for role-to-role notes that can wait a poll.
+
 ## Guardrails worth encoding
 
 - Only pick tickets carrying the ready label.
@@ -68,6 +130,15 @@ never has to track down a specific session.
 - One ticket at a time per worker; In Review before claiming the next.
 - If CI won't go green after a fair effort, use the blocked handoff rather than
   leaving work half-done.
+
+## Adapting to your tracker
+
+This protocol is written against the **capability contract** above, not any one tool. To
+run it on yours, map the eight primitives once — see
+**[`adapting-to-your-tracker.md`](adapting-to-your-tracker.md)** for a per-tracker mapping
+table, a worked **GitHub Issues + Projects** reference setup, and a **bootstrap prompt**
+you can hand your own AI assistant to generate the concrete board config, CLI recipes, and
+agent instructions for your exact tool.
 
 ## When to graduate to something heavier
 

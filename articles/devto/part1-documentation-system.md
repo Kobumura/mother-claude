@@ -4,7 +4,7 @@ published: true
 description: A three-tier documentation architecture that reduces AI assistant onboarding from hours to minutes. First test: Claude went from cold start to planning mode in under 5 minutes.
 tags: ai, productivity, documentation, developerexperience
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part1-documentation-system.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/master/articles/devto/part1-documentation-system.md
 cover_image: https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3i3yali4xcq7dama572r.png
 
 ---
@@ -277,7 +277,7 @@ The checklist covers:
 
 This emerged from a greenfield rebuild where we wanted to prevent the technical debt accumulation that plagued the original project. We call it the **"Instant Retrospective"**—quality checkpoints at every natural stopping point, not just at the end of sprints or after incidents. The checklist lives alongside Mother CLAUDE and is referenced whenever Claude proposes or completes non-trivial changes.
 
-*The next article in this series covers the Instant Retrospective approach in depth—including how we made Claude responsible for initiating these checkpoints automatically.*
+*Next in this series: session handoffs—giving your AI assistant memory that actually persists between sessions. The Instant Retrospective approach gets its own installment later in the series.*
 
 ---
 

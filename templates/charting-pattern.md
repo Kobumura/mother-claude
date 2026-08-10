@@ -14,7 +14,7 @@ A lightweight, coordinated approach to data visualization that balances rich int
 Include via CDN or npm:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 ```
 
 ### Basic Chart Template

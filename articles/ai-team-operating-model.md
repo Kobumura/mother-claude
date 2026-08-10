@@ -4,7 +4,7 @@ published: false
 description: Autonomous AI coding agents aren't coordinated by intelligence -- they're coordinated by structure. The operating model behind it: four roles, the issue tracker as the only coordination layer, and guardrails the agents can't cross.
 tags: ai, architecture, systemsthinking, productivity
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/ai-team-operating-model.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/master/articles/ai-team-operating-model.md
 ---
 
 *Good morning, Angels.*

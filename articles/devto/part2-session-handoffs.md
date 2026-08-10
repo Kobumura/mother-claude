@@ -4,7 +4,7 @@ published: true
 description: LLM sessions are ephemeral. Session handoffs are structured documents that give your AI persistent, searchable, portable memory across sessions and tools.
 tags: ai, productivity, documentation, devops
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part2-session-handoffs.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/master/articles/devto/part2-session-handoffs.md
 ---
 
 > **TL;DR**: LLM sessions are ephemeral — when context fills up or you close the window, everything learned is gone. Session handoffs are structured documents that bridge this gap, giving your AI assistant persistent memory that survives across sessions, tools, and team changes.
@@ -320,7 +320,7 @@ The goal isn't to fight the stateless nature of LLM sessions. It's to build infr
 
 ---
 
-*This is Part 2 of the Designing AI Teammates series. Part 1 covered onboarding with Mother CLAUDE. Part 3 will cover giving your AI assistant responsibility for initiating quality checkpoints.*
+*This is Part 2 of the Designing AI Teammates series. Part 1 covered onboarding with Mother CLAUDE. Part 3 will cover automating the handoff itself—hooks that write it for you.*
 
 ---
 

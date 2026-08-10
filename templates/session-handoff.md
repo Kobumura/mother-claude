@@ -115,4 +115,4 @@ The transition takes seconds instead of 10-15 minutes of re-establishing context
 
 ---
 
-*For more context on session handoffs, see the [article on dev.to](https://dev.to/dorothyjb/session-handoffs-giving-your-ai-assistant-memory-that-actually-persists-4mp2).*
+*For more context on session handoffs, see the [article on dev.to](https://dev.to/dorothyjb/session-handoffs-giving-your-ai-assistant-memory-that-actually-persists-je9).*

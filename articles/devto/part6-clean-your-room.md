@@ -1,10 +1,10 @@
 ---
 title: "Mother CLAUDE: Clean Your Room and Eat Your Vegetables"
-published: false
+published: true
 description: The whole Mother CLAUDE system in one metaphor — you built an AI that makes sure you do the things you already know you should do.
 tags: ai, productivity, automation, developerexperience
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part6-clean-your-room.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/master/articles/devto/part6-clean-your-room.md
 ---
 
 > **TL;DR**: You know you should write documentation. You know you should run quality checks. You know you should create handoffs. You just... don't always do it. Mother CLAUDE is the responsible one who makes sure you do the things you already know you should do.

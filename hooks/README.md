@@ -101,7 +101,7 @@ Loads the most recent session handoff when you start a new Claude Code session. 
 
 Automatically generates session handoff documents using Claude Haiku. Reads the conversation transcript, summarizes it, and saves to the project's session_handoffs directory.
 
-**Cost:** ~$0.02-0.03 per handoff (Haiku is cheap)
+**Cost:** pennies per handoff at small-model (Haiku-class) pricing
 
 **Output location:** Auto-detected in this order:
 1. Path from `.claude/project.json`
@@ -115,19 +115,18 @@ Automatically generates session handoff documents using Claude Haiku. Reads the 
 
 Automatically approves safe operations so you don't have to click "yes" constantly.
 
-**Auto-approved by default:**
-- All file operations (Read, Write, Edit)
-- All search operations (Glob, Grep, WebSearch)
-- Git operations (add, commit, push, pull, etc.)
-- Package management (npm install, pip install)
-- Build/test commands
+**The posture: allowlist, not blocklist.** Only commands matching an explicit safe
+pattern are auto-approved, and a chained command (`cd x && <anything>`) is approved
+only if every segment is independently safe. The dangerous-pattern list (sudo,
+force-push, hard reset, `find -delete`, pipe-to-shell) is a backstop, not the
+boundary — a blocklist can never enumerate everything harmful: `npm install` runs
+arbitrary package lifecycle scripts, and blocking `rm -rf /` says nothing about
+`rm -rf ~`.
 
-**Never auto-approved:**
-- `sudo`
-- `git push --force`
-- `git reset --hard`
-- `rm -rf /`
-- Piping to shell
+**It ships permissive in places** (Write/Edit and routine git auto-approved) because
+our real gate is reviewing diffs in git, not clicking prompts. Review the lists
+against your own risk tolerance before installing — that's what the CUSTOMIZATION
+section is for.
 
 **Customization:** Edit the `SAFE_BASH_PATTERNS` and `DANGEROUS_PATTERNS` lists in auto_approve.py.
 

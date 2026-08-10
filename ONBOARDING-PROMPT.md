@@ -34,9 +34,9 @@ interview in Phase 2.
    need to read them all now (that would waste context). Instead, read the one that
    matches each optional module I choose, right before you build that module:
        part2-session-handoffs      → session handoffs
-       part3-automated-handoffs    → auto handoff hooks
+       part3-automated-handoffs    → handoff + auto-approve hooks
        part4-instant-retrospectives→ retrospectives / checkpoint checklist
-       part5-permission-effect     → auto-approve hook
+       part5-permission-effect     → collaboration preferences (the permission effect)
        part6-clean-your-room       → docs hygiene
        part7-custom-agents         → custom agents
 4. When you've done 1–2, summarize back to me in ~10 lines: the three tiers, what

@@ -1,10 +1,10 @@
 ---
 title: "Mother CLAUDE: Automating Everything with Hooks"
-published: false
+published: true
 description: How we used Claude Code hooks to automate session handoffs, context loading, and permission approvals—turning manual discipline into invisible infrastructure.
 tags: ai, automation, productivity, developerexperience
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part3-automated-handoffs.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/master/articles/devto/part3-automated-handoffs.md
 ---
 
 > **TL;DR**: We built three hooks that automate the Mother CLAUDE workflow: (1) auto-generate session handoffs on context compaction, (2) load previous handoffs at session start, and (3) auto-approve safe operations. Manual discipline becomes invisible infrastructure.
@@ -129,7 +129,7 @@ def generate_handoff(conversation: str, cwd: str, api_key: str):
     client = anthropic.Anthropic(api_key=api_key)
 
     response = client.messages.create(
-        model="claude-3-haiku-20240307",
+        model="claude-haiku-4-5-20251001",
         max_tokens=4000,
         messages=[{
             "role": "user",
@@ -418,7 +418,7 @@ This handles all scenarios:
 
 ## Handling Large Sessions
 
-Haiku has a smaller context window than Opus. For very long sessions:
+Summarization doesn't need the whole transcript, and a smaller payload is faster and cheaper. For very long sessions:
 
 1. The script takes the **last 80 messages** of the conversation
 2. Each message is truncated to 3,000 characters
@@ -441,25 +441,25 @@ Even with multiple sessions per day, the monthly cost is negligible compared to 
 
 ### Choosing a Model
 
-As of this writing, we use Claude Haiku (`claude-3-haiku-20240307`) for handoff generation. It's cheap, fast, and good enough for structured summarization.
+We use the current Haiku (`claude-haiku-4-5-20251001` as of this update) for handoff generation. It's cheap, fast, and good enough for structured summarization.
 
-| Model | Cost per Handoff | Speed | When to Use |
-|-------|-----------------|-------|-------------|
-| Haiku | ~$0.02 | Fast | Default choice - summarization doesn't need genius |
-| Sonnet | ~$0.15 | Medium | If you want richer, more nuanced summaries |
-| Opus | ~$1+ | Slower | Overkill for handoffs - save it for real work |
+| Model tier | Relative cost | Speed | When to Use |
+|-----------|---------------|-------|-------------|
+| Haiku (small) | an order of magnitude cheaper than the frontier tier | Fast | Default choice - summarization doesn't need genius |
+| Sonnet (mid) | middle | Medium | If you want richer, more nuanced summaries |
+| Opus (frontier) | highest | Slower | Overkill for handoffs - save it for real work |
 
 To change models, edit `session_handoff.py`:
 
 ```python
 # Default
-model="claude-3-haiku-20240307"
+model="claude-haiku-4-5-20251001"
 
 # For richer summaries (costs more)
-model="claude-sonnet-4-20250514"
+model="claude-sonnet-5"
 ```
 
-Anthropic releases new models regularly. Check [docs.anthropic.com](https://docs.anthropic.com) for the latest model IDs. The hook script in our repo uses Haiku, but swap in whatever model suits your needs and budget.
+Model IDs rotate as generations ship — any pinned string in an article (including this one) has a shelf life. Pin the current small model, expect to bump it, and resolve the latest IDs from the models list at [docs.anthropic.com](https://docs.anthropic.com) rather than from prose.
 
 ---
 
@@ -591,11 +591,10 @@ This hook intercepts permission requests and auto-approves safe ones:
 
 ```python
 # auto_approve.py
-always_safe = ["Read", "Glob", "Grep", "Write", "Edit"]
+always_safe = ["Read", "Glob", "Grep"]  # add Write/Edit only if git review is your real gate
 
 safe_bash = [
-    r'^git\s+(status|log|diff|add|commit|push|pull)',
-    r'^npm\s+(test|run|install)',
+    r'^git\s+(status|log|diff)',
     r'^ls(\s|$)',
 ]
 
@@ -606,17 +605,18 @@ dangerous = [
 ]
 ```
 
-**What gets auto-approved:**
-- All file operations (Read, Write, Edit)
-- Git operations (add, commit, push, pull)
-- Package management (npm install, pip install)
-- Build/test commands
+**What gets auto-approved:** a narrow allowlist — read-only inspection plus whatever you've
+explicitly decided to trust at your risk tolerance (we allow Write/Edit and routine git
+because our real gate is reviewing diffs in git, not clicking prompts).
 
-**What still requires approval:**
-- `sudo` anything
-- `git push --force`
-- `git reset --hard`
-- Destructive operations
+**What still requires approval:** everything else — and that's the design, because a
+deny-list can't be the security boundary. `npm install` executes arbitrary package
+lifecycle scripts; an unrestricted Write could edit the hook (or your settings) itself;
+and blocking `rm -rf /` says nothing about `rm -rf ~`. The allowlist is the boundary; the
+dangerous-pattern list is only a backstop. One more rule that matters: a chained command
+(`cd x && <anything>`) is only safe if **every** segment is independently safe —
+approving because the first segment matched is a classic hole (the shipped hook splits
+chains for exactly this reason).
 
 **Configuration:**
 
@@ -635,7 +635,7 @@ dangerous = [
 ]
 ```
 
-**Result:** Claude flows. No more clicking "yes" fifty times a session. Dangerous operations still get caught.
+**Result:** Claude flows — no more clicking "yes" fifty times a session — without pretending a blocklist is a boundary.
 
 ---
 

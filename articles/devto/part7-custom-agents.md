@@ -4,7 +4,7 @@ published: false
 description: Custom agents have been in AI coding tools for months. We finally connected the dots—the documentation system we'd been building was already the blueprint for a team of specialists.
 tags: ai, productivity, automation, developerexperience
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part7-custom-agents.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/master/articles/devto/part7-custom-agents.md
 ---
 
 > **TL;DR**: Custom agents let you split one generalist AI into a team of specialists—each with its own context, tools, and personality. Every major AI coding tool now supports them. And if you've been building a documentation system like the one in this series, you already have the blueprints for your agents. You just didn't know it yet.
@@ -30,12 +30,12 @@ Custom agents aren't new. They've been rolling out across AI coding tools since 
 | Tool | What They Call It | Format | Available Since |
 |------|------------------|--------|----------------|
 | **Claude Code** | Custom subagents | `.claude/agents/*.md` (YAML frontmatter + markdown) | ~Mid 2025 |
-| **Cursor** | Subagents + Skills | `SKILL.md` + subagent config | Early 2026 |
+| **Cursor** | Rules / agent instructions | `.cursor/rules`, `AGENTS.md` | 2025-2026 |
 | **Windsurf** | Agent instructions | `AGENTS.md` (plain markdown) | 2025 |
 | **GitHub Copilot** | Custom agents | `.github-private` repo configs | 2025-2026 |
 | **Cline** | MCP extensions | Model Context Protocol tools | 2025 |
 
-The implementations vary. The concept is identical: **stop asking one AI to do everything, and start giving specialists their own context, tools, and instructions.**
+The implementations vary (and this table is a snapshot—conventions in this space move monthly). The concept is identical: **stop asking one AI to do everything, and start giving specialists their own context, tools, and instructions.**
 
 And yes—they're *still* just markdown files. Our tagline lives on.
 
@@ -436,10 +436,10 @@ Most agent frameworks let you choose which model powers each agent. This matters
 
 | Task | Model | Why |
 |------|-------|-----|
-| Quality review | Sonnet/GPT-4o | Needs nuance and judgment |
+| Quality review | Mid/frontier tier (e.g. Sonnet) | Needs nuance and judgment |
 | Jira ticket management | Sonnet | Needs to follow API patterns correctly |
 | Cross-repo search | Sonnet | Needs to reason about connections |
-| Session handoff generation | Haiku/GPT-4o-mini | Structured summarization—doesn't need genius |
+| Session handoff generation | Small tier (e.g. Haiku) | Structured summarization—doesn't need genius |
 
 **Rule of thumb**: Use the smartest model for tasks requiring judgment. Use the cheapest model for tasks that are mostly structured formatting.
 

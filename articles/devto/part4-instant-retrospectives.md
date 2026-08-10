@@ -1,10 +1,10 @@
 ---
 title: "Mother CLAUDE: Instant Retrospectives Assign Quality Enforcement to Your AI"
-published: false
+published: true
 description: How we made Claude responsible for initiating quality checkpoints at every commit and PR—so humans don't have to remember.
 tags: ai, codequality, productivity, devops
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part4-instant-retrospectives.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/master/articles/devto/part4-instant-retrospectives.md
 ---
 
 > **TL;DR**: Instead of retrospectives at the end of sprints (when problems have compounded), we run quality checkpoints at every PR and commit. One meta question drives everything: "If I had to hand this codebase to a new developer tomorrow, would they understand it without me explaining anything?"

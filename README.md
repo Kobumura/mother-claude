@@ -180,7 +180,7 @@ The system is documented as it was built, in a series on dev.to
 ([dev.to/dorothyjb](https://dev.to/dorothyjb)):
 
 1. **[Mother CLAUDE: How We Built a Documentation System That Makes LLMs Productive Immediately](https://dev.to/dorothyjb/how-we-built-a-documentation-system-that-makes-llms-productive-immediately-59hc)** — the three-tier architecture
-2. **[Session Handoffs: Giving Your AI Assistant Memory That Actually Persists](https://dev.to/dorothyjb/session-handoffs-giving-your-ai-assistant-memory-that-actually-persists-4mp2)** — cross-session context preservation
+2. **[Session Handoffs: Giving Your AI Assistant Memory That Actually Persists](https://dev.to/dorothyjb/session-handoffs-giving-your-ai-assistant-memory-that-actually-persists-je9)** — cross-session context preservation
 3. **[Automated Handoffs](articles/devto/part3-automated-handoffs.md)** — hooks that write the handoff for you
 4. **[Instant Retrospectives](articles/devto/part4-instant-retrospectives.md)** — AI-initiated quality checkpoints
 5. **[The Permission Effect](articles/devto/part5-permission-effect.md)** — what changes when the assistant can act

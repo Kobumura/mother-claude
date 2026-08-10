@@ -1,10 +1,10 @@
 ---
 title: "Mother CLAUDE: The Permission Effect - Why Your AI Won't Suggest Things (And How to Fix It)"
-published: false
+published: true
 description: How explicit collaboration preferences in documentation change AI behavior—not just AI knowledge. A single line in CLAUDE.md transformed a passive tool into a proactive teammate.
 tags: ai, productivity, collaboration, developerexperience
 series: Designing AI Teammates
-canonical_url: https://github.com/Kobumura/mother-claude/blob/main/articles/devto/part5-permission-effect.md
+canonical_url: https://github.com/Kobumura/mother-claude/blob/master/articles/devto/part5-permission-effect.md
 ---
 
 > **TL;DR**: AI assistants are trained to be helpful but not presumptuous. Without explicit permission, they'll wait for you to ask. A single line in your documentation—"Dorothy appreciates questions and proactive suggestions"—fundamentally changed Claude's behavior from reactive tool to proactive collaborator.
@@ -132,8 +132,8 @@ In the charting example, Claude noticed a pattern worth documenting across proje
 When Claude suggested the charting guide:
 1. I said yes
 2. The template got created
-3. Claude learned the suggestion was valued
-4. Future sessions become more collaborative
+3. The pattern got documented as a template
+4. Future sessions inherit it—the documentation carries the learning; the model itself remembers nothing
 
 But none of that happens if the first suggestion doesn't get made. **Permission unlocks the first step of the feedback loop.**
 

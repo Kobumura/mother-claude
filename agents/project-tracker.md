@@ -40,7 +40,7 @@ Never hardcode epic keys. Always query for current epics:
 curl -s -u "$JIRA_EMAIL:$JIRA_TOKEN" \
   -G --data-urlencode "jql=project = FE AND issuetype = Epic AND status != Done ORDER BY created DESC" \
   --data-urlencode "fields=summary,status" \
-  "https://your-instance.atlassian.net/rest/api/3/search"
+  "https://your-instance.atlassian.net/rest/api/3/search/jql"
 ```
 
 When creating a story, query for the relevant epic first, then assign via the `parent` field.

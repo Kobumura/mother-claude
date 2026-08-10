@@ -22,6 +22,14 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# Force UTF-8 stdout — Windows defaults to cp1252, which crashes on Unicode
+# characters in handoff markdown; a crashing hook looks like a hang.
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except (AttributeError, OSError):
+        pass
+
 # Directory for tracking session state (prevents duplicate handoffs)
 HOOKS_STATE_DIR = Path.home() / ".claude" / "hooks" / ".state"
 
@@ -53,7 +61,7 @@ CRITICAL INSTRUCTIONS:
 - First line must be a SHORT_TITLE (2-4 words, lowercase, hyphenated) for the filename
 - Extract SPECIFIC file names, paths, and technical details from the conversation
 - **Capture DECISIONS and their RATIONALE** - not just what was done, but WHY
-- Include Jira tickets, GitHub issues, or other references if mentioned (e.g., CD-123, #456)
+- Include Jira tickets, GitHub issues, or other references if mentioned (e.g., PROJ-123, #456)
 - Use markdown TABLES for structured data (migrations, rules, phases, status tracking)
 - Include brief code snippets or SQL schemas if they were significant
 - For architecture decisions, explain the alternatives considered and why one was chosen
@@ -357,7 +365,7 @@ def generate_handoff(conversation: str, cwd: str, trigger: str, api_key: str) ->
 
     try:
         response = client.messages.create(
-            model="claude-3-haiku-20240307",
+            model="claude-haiku-4-5-20251001",
             max_tokens=4000,
             metadata={"user_id": "mother-claude-hooks"},
             messages=[{"role": "user", "content": prompt}]

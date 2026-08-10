@@ -78,6 +78,32 @@ an autonomous merge; and every action is signed by a stable worker identity on t
 in commit trailers, and in handoffs — **vendor-neutral, auditable provenance**, not tool
 branding.
 
+## Origins — and what it governs now
+
+Mother CLAUDE started inside a single product: an AI-assisted mobile-app rebuild where
+every new session began from zero — re-deriving the codebase, the standards, and the
+reasons behind decisions that had already been made, while hard-won conventions evaporated
+between sessions. The documentation system was built to stop paying that tax. The work and
+governance layers grew later, when the AI sessions became a team and "productive
+immediately" stopped being enough — the sessions also had to be *coordinated, bounded, and
+auditable*.
+
+The internal version now governs a portfolio of products across more than a dozen
+repositories:
+
+- a **white-label React Native mobile template** and **white-label API server** — the
+  product line that grew out of the original app
+- a **research-collaboration SaaS platform**
+- a **marketing-analytics platform**
+- a **dog-health monitoring SaaS** with companion mobile app
+- a **CI/CD pipeline** that builds and ships the React Native apps to both stores
+- plus the **legacy PHP applications** the standards were first hardened against
+
+Same standards, same worker protocol, same gates everywhere — the operating model is the
+constant; the stacks (React Native, Node/Express, Next.js, PHP) are the variables. The
+system also governs itself: the repo ships the
+[self-audit harness](templates/self-audit/) it is periodically run through.
+
 ## Run an autonomous AI team — the Worker System
 
 Everything you need is in **[`worker-system/`](worker-system/)**. The **protocol is

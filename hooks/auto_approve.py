@@ -119,25 +119,41 @@ DANGEROUS_PATTERNS = [
     r'\|\s*bash\b',
     r'git\s+reset\s+--hard',
     r'git\s+clean\s+-f',
-    r'git\s+push\s+.*--force',
+    r'git\s+push\b.*\s(-f|--force)\b',  # any force push, wherever the flag sits
+    r'find\s+.*(-delete|-exec)',  # find can destroy/execute, not just search
 ]
+
+# Chain/pipe operators. A command is only safe if EVERY segment is safe:
+# `cd x && <anything>` must never be approved because the first segment
+# happened to match a safe pattern. (A quoted string containing one of these
+# operators splits conservatively — worst case the command falls through to
+# the normal permission prompt, never the other way around.)
+CHAIN_SPLIT = re.compile(r'&&|\|\||;|\||\n')
 
 
 def is_safe_bash_command(command: str) -> bool:
-    """Check if a bash command is safe to auto-approve."""
+    """Check if a bash command is safe to auto-approve.
+
+    Dangerous patterns are checked against the WHOLE string first; then the
+    command is split on chain/pipe operators and every segment must
+    independently match a safe pattern.
+    """
     command = command.strip()
 
-    # Check dangerous patterns first
+    # Check dangerous patterns first, against the full string
     for pattern in DANGEROUS_PATTERNS:
         if re.search(pattern, command, re.IGNORECASE):
             return False
 
-    # Check if matches any safe pattern
-    for pattern in SAFE_BASH_PATTERNS:
-        if re.search(pattern, command, re.IGNORECASE):
-            return True
-
-    return False
+    # Every chained/piped segment must be independently safe
+    segments = [s.strip() for s in CHAIN_SPLIT.split(command) if s.strip()]
+    if not segments:
+        return False
+    return all(
+        any(re.search(pattern, segment, re.IGNORECASE)
+            for pattern in SAFE_BASH_PATTERNS)
+        for segment in segments
+    )
 
 
 def main():

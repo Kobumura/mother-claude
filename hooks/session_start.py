@@ -18,6 +18,15 @@ import os
 import sys
 from pathlib import Path
 
+# Force UTF-8 stdout — Windows defaults to cp1252, which crashes on Unicode
+# characters commonly found in handoff markdown (dashes, arrows, em-dashes).
+# A crashing SessionStart hook presents as Claude "freezing" at session start.
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except (AttributeError, OSError):
+        pass
+
 
 def find_handoff_directory(cwd: str) -> Path | None:
     """Find the session_handoffs directory for this project."""

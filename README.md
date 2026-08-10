@@ -1,64 +1,89 @@
 # Mother CLAUDE
 
-> **A three-tier documentation architecture that makes AI assistants productive immediately.**
+> **A governed operating model for AI-assisted software delivery** — durable context,
+> autonomous worker sessions, explicit human decision rights, isolated execution, quality
+> gates, and auditable provenance. Built and run in production, then genericized.
 
-Mother CLAUDE is a documentation system designed to solve the "context problem" with AI coding assistants. Instead of re-explaining your codebase every session, you build durable documentation that any AI can read and understand instantly.
+Mother CLAUDE started as a documentation architecture that makes AI assistants productive
+immediately — and that layer is still here, underneath. What it grew into is an operating
+model for running a **team of autonomous AI coding sessions** that ship real work while a
+human keeps every decision that genuinely needs one.
 
-## The Problem
-
-Every time you start a new session with an AI assistant, you lose context:
-- Project structure? Forgotten.
-- Coding conventions? Gone.
-- Why that weird workaround exists? Vanished.
-
-You spend the first 10-15 minutes of every session re-establishing context that existed yesterday.
-
-## The Solution
-
-A three-tier documentation system:
+## The system in one picture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│              Tier 3: On-Demand Deep Docs                │
-│  Detailed guides loaded only when needed                │
-│  → journey-system.md, api-contracts.md, etc.            │
-└─────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│              Tier 2: Mother CLAUDE (Shared)             │
-│  Cross-project standards, commit guidelines, Jira setup │
-│  → Loaded at session start (lean) + on-demand (deep)    │
-└─────────────────────────────────────────────────────────┘
-                           │
-          ┌────────────────┼────────────────┐
-          ▼                ▼                ▼
-┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐
-│ Project CLAUDE.md │ │ Project CLAUDE.md │ │ Project CLAUDE.md │
-│ Tier 1: Lean,     │ │ Tier 1: Lean,     │ │ Tier 1: Lean,     │
-│ project-specific  │ │ project-specific  │ │ project-specific  │
-└───────────────────┘ └───────────────────┘ └───────────────────┘
+                        HUMAN
+          product / UX / risk / prod-promotion
+                          │
+                          ▼
+                      DISPATCHER
+              specs features → Ready tickets
+                          │
+                          ▼
+         ┌────────── ISSUE TRACKER ──────────┐
+         │   durable state + audit trail     │
+         └──────┬────────┬────────┬──────────┘
+                │        │        │
+             worker    worker   worker
+                │        │        │
+              (each in an isolated git worktree)
+                └────────┼────────┘
+                         ▼
+                      PR + CI
+                         │
+                         ▼
+                       STEWARD
+                  review / reconcile
+                    │           │
+              objective      judgment
+                 │              │
+                 ▼              ▼
+               merge          HUMAN
+                              verifies
 ```
 
-### Core Principles
+- **Memory:** shared + project docs, session handoffs, evolution history
+- **Coordination:** the issue tracker — durable, auditable, already trusted
+- **Execution:** isolated git worktrees, one ticket per worker
+- **Evidence:** tests + CI + the PR itself
+- **Judgment:** graduated autonomy; the calls that matter stay human
 
-1. **Lean at load, deep on demand** - Keep `CLAUDE.md` files under 100 lines. Load detailed docs only when needed.
+## Three layers
 
-2. **Single source of truth** - Shared standards live in one place. Projects reference, not duplicate.
+1. **Memory layer** — the original three-tier documentation architecture: lean per-project
+   context files, shared cross-project standards, deep docs loaded on demand, session
+   handoffs. This is what makes any session productive in minutes.
+2. **Work layer** — the issue tracker as the *only* coordination layer: roles, queues,
+   claims, isolated worktrees, PRs. No session talks to another directly; status is the
+   single source of truth, chat is for attention only, never state.
+3. **Governance layer** — Definition of Done, tests and CI as objective evidence, steward
+   review, escalation paths, graduated trust, and explicit human decision boundaries.
 
-3. **Self-documenting** - The system explains itself. New AI sessions understand without human explanation.
+## The governance model — what AI is not allowed to decide
 
-4. **Tool-agnostic** - Works with Claude, Cursor, Copilot, or whatever comes next.
+Autonomous sessions may make **reversible engineering decisions** constrained by documented
+standards and tests. Everything else escalates:
 
-## Run an Autonomous AI Team — the Worker System
+- **Product direction and UX judgment** — always human.
+- **Production promotion** — human-gated, after verification. Agents never merge to a
+  production branch.
+- **Architecture decisions with cross-system consequences**, dependency or infrastructure
+  changes with shared blast radius.
+- **Security and data-governance exceptions.**
+- **Anything whose correctness can't be established by objective evidence** (tests, CI,
+  reproduction) — if it takes taste to judge, a human judges it.
 
-Beyond documentation, Mother CLAUDE includes a field-tested model for running a **team of
-autonomous AI coding agents** that ship real work while a human stays at product direction. The
-mechanical work — coordinating, reconciling, merging, feeding the queue — runs autonomously
-through your issue tracker; the human only decides *what* to build and verifies it works. In
-production it roughly **doubled per-project throughput with no added engineers**.
+Each task runs on an isolated branch/worktree; objective work must pass tests and CI before
+an autonomous merge; and every action is signed by a stable worker identity on the tracker,
+in commit trailers, and in handoffs — **vendor-neutral, auditable provenance**, not tool
+branding.
 
-Everything you need is in **[`worker-system/`](worker-system/)**:
+## Run an autonomous AI team — the Worker System
+
+Everything you need is in **[`worker-system/`](worker-system/)**. The **protocol is
+tracker-agnostic**; the package ships a **reference implementation** wired for Jira + Slack +
+GitHub, and [`templates/adapting-to-your-tracker.md`](templates/adapting-to-your-tracker.md)
+maps the eight primitives it needs onto GitHub Issues, Linear, or anything else.
 
 | File | What it is |
 |---|---|
@@ -66,24 +91,49 @@ Everything you need is in **[`worker-system/`](worker-system/)**:
 | [operating-model.md](worker-system/operating-model.md) | The four roles, the board-as-coordination-layer, the trust model |
 | [agent-worker-protocol.md](worker-system/agent-worker-protocol.md) | The worker rules in full (claim loop, worktree/PR isolation) |
 | [onboarding.md](worker-system/onboarding.md) | Set up a machine to run workers |
-| [team-up.ps1](worker-system/team-up.ps1) | One-command launcher for multiple sessions |
+| [team-up.ps1](worker-system/team-up.ps1) / [team-up.sh](worker-system/team-up.sh) | One-command launchers (Windows / macOS+Linux) |
 | [standards/](worker-system/standards/) | The quality bar the workers enforce |
+| [templates/agent-worker-coordination.md](templates/agent-worker-coordination.md) | The coordination pattern, reduced to a tracker capability contract |
 | [scripts/team-impact.py](worker-system/scripts/team-impact.py) | Measure the payoff — tickets per active day, before vs. after |
 
-**Five-minute on-ramp:** read `worker-system/README.md` → skim `operating-model.md` → follow
-`onboarding.md` on one machine → launch a couple of workers with `team-up.ps1` → after a week,
-run `team-impact.py` to see your own before/after.
+**Measured, not benchmarked:** in production across three products, during the first month
+of sustained daily operation, tickets landed per active day ran **4.2× the prior baseline**
+— and the baseline was already AI-assisted solo development, so that's the conservative
+comparison. The measurement script is included; run your own before/after.
 
-## Quick Start
+## Hard-won lessons (from running it, not designing it)
 
-1. **Create a shared docs repo** with your organization's standards
-2. **Add `CLAUDE.md` to each project** - lean, specific, references shared docs
-3. **Use session handoffs** to maintain context across sessions
-4. **Run instant retrospectives** at every commit/PR
+- Don't let agents share a mutable checkout — worktree isolation isn't optional.
+- A shared dependency tree is shared mutable state; gate installs to an owner or isolate.
+- Chat is not state. If it matters, it goes on the tracker.
+- Claim → reconcile → build, in that order: claim first so another worker can't take the
+  ticket while you're evaluating it; reconcile against git before you build so you don't
+  rebuild what already landed.
+- Never auto-merge work whose Definition of Done has no objective test.
+- An autonomous system needs liveness supervision that is not one of its own sessions —
+  the known failure modes (worker-halt/refill race, the supervision gap) are documented,
+  not hidden, in [operating-model.md](worker-system/operating-model.md).
+
+## The memory layer — the three-tier documentation architecture
+
+The original core, still load-bearing:
+
+```
+Tier 3: On-demand deep docs      (loaded only when needed)
+Tier 2: Mother CLAUDE (shared)   (cross-project standards, lean at session start)
+Tier 1: Project CLAUDE.md        (lean, project-specific, references Tier 2)
+```
+
+1. **Lean at load, deep on demand** — keep context files under ~100 lines; load detail when needed.
+2. **Single source of truth** — shared standards live in one place; projects reference, never duplicate.
+3. **Self-documenting** — new AI sessions understand the system without a human explaining it.
+4. **Tool-agnostic** — works with Claude, Cursor, Copilot, or whatever comes next.
+
+**Quick start:** create a shared docs repo with your standards → add a lean `CLAUDE.md` to
+each project → use session handoffs to keep context across sessions → run instant
+retrospectives at every commit/PR.
 
 ## Templates
-
-This repo includes templates to get you started:
 
 | Template | Purpose |
 |----------|---------|
@@ -93,52 +143,48 @@ This repo includes templates to get you started:
 | [`templates/session-index.md`](templates/session-index.md) | Quick navigation to all session handoffs |
 | [`templates/current-project-state.md`](templates/current-project-state.md) | Living snapshot of what's deployed, working, broken |
 | [`templates/checkpoint-checklist.md`](templates/checkpoint-checklist.md) | Quality gates at every commit |
+| [`templates/agent-worker-coordination.md`](templates/agent-worker-coordination.md) | Tracker-agnostic coordination: the capability contract + label-inbox pattern |
+| [`templates/adapting-to-your-tracker.md`](templates/adapting-to-your-tracker.md) | Map the eight tracker primitives onto GitHub Issues, Linear, etc. |
+| [`templates/self-audit/`](templates/self-audit/) | Adversarial self-audit prompts — audit the knowledge, the tooling, then ideate |
 | [`templates/charting-pattern.md`](templates/charting-pattern.md) | Chart.js + SVG sparklines for data visualization |
 
-## The Article Series
+## The article series
 
-This system is documented in a three-part series on dev.to:
+The system is documented as it was built, in a series on dev.to
+([dev.to/dorothyjb](https://dev.to/dorothyjb)):
 
-1. **[Mother CLAUDE: How We Built a Documentation System That Makes LLMs Productive Immediately](https://dev.to/dorothyjb/how-we-built-a-documentation-system-that-makes-llms-productive-immediately-59hc)** - The three-tier architecture
+1. **[Mother CLAUDE: How We Built a Documentation System That Makes LLMs Productive Immediately](https://dev.to/dorothyjb/how-we-built-a-documentation-system-that-makes-llms-productive-immediately-59hc)** — the three-tier architecture
+2. **[Session Handoffs: Giving Your AI Assistant Memory That Actually Persists](https://dev.to/dorothyjb/session-handoffs-giving-your-ai-assistant-memory-that-actually-persists-4mp2)** — cross-session context preservation
+3. **[Automated Handoffs](articles/devto/part3-automated-handoffs.md)** — hooks that write the handoff for you
+4. **[Instant Retrospectives](articles/devto/part4-instant-retrospectives.md)** — AI-initiated quality checkpoints
+5. **[The Permission Effect](articles/devto/part5-permission-effect.md)** — what changes when the assistant can act
+6. **[Clean Your Room](articles/devto/part6-clean-your-room.md)** — codebase hygiene as an enabling layer
+7. **[Custom Agents](articles/devto/part7-custom-agents.md)** — specialized agents on top of the system
 
-2. **[Session Handoffs: Giving Your AI Assistant Memory That Actually Persists](https://dev.to/dorothyjb/session-handoffs-giving-your-ai-assistant-memory-that-actually-persists-4mp2)** - Cross-session context preservation
+## Key concepts
 
-3. **Instant Retrospectives** (coming soon) - AI-initiated quality checkpoints
+**Session handoffs** — LLM sessions are ephemeral; handoffs are structured documents
+capturing what was accomplished, current state, lessons, and next steps. At session end the
+AI writes one; at session start the AI reads it. They double as the decision-archaeology
+record: *why* something was decided, not just what changed.
 
-## Key Concepts
+**Instant retrospectives** — quality checkpoints at every natural stopping point, not just
+sprint end: *"If I handed this codebase to a new developer tomorrow, would they understand
+it without me explaining anything?"*
 
-### Session Handoffs
-
-LLM sessions are ephemeral. Session handoffs are structured documents that capture:
-- What was accomplished
-- Current state
-- Lessons learned
-- Next steps
-- Key files modified
-
-At session end, the AI creates a handoff. At session start, the AI reads it. Context restored in seconds.
-
-### Instant Retrospectives
-
-Quality checkpoints at every natural stopping point, not just at sprint end. The AI asks:
-
-> "If I had to hand this codebase to a new developer tomorrow, would they understand it without me explaining anything?"
-
-### EVOLUTION.md
-
-For legacy projects, `EVOLUTION.md` is more important than `CLAUDE.md`. It captures:
-- Why features were built the way they were
-- What users complained about
-- Bugs that required manual fixes
-- What not to repeat
-
-Without it, the AI can understand *what* exists but not *why* it exists.
+**EVOLUTION.md** — for legacy projects, more important than `CLAUDE.md`: why features were
+built the way they were, what users complained about, what not to repeat. Without it the AI
+understands *what* exists but not *why*.
 
 ## Philosophy
 
-**LLMs don't need more prompts—they need better institutional memory.**
+**LLMs don't need more prompts — they need better institutional memory, and autonomy needs
+governance before it needs scale.**
 
-This system isn't about clever prompting. It's about treating documentation as infrastructure that survives beyond any single session, any single project, and any single AI tool.
+This system isn't clever prompting. It's documentation treated as infrastructure, an issue
+tracker treated as a coordination bus, CI treated as evidence, and a human kept exactly
+where human judgment matters — designed to survive beyond any single session, project, or
+AI vendor.
 
 ## License
 

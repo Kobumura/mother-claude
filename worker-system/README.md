@@ -41,7 +41,11 @@ which is what it's for.
 - **git** with worktree support — workers each run in their own worktree.
 - **An issue tracker** whose board carries the seven-status flow the model uses
   (`To Do → Ready → In Progress → Needs Input → In Review → Changes Requested → Done`). Jira works
-  out of the box; map the statuses onto Linear / GitHub Issues / etc. if that's your tracker.
+  out of the box; the protocol itself is tracker-agnostic — see
+  [`../templates/adapting-to-your-tracker.md`](../templates/adapting-to-your-tracker.md) for the
+  eight primitives it needs and how they map onto Linear / GitHub Issues / etc. This package is
+  the **reference implementation** (Jira + Slack + GitHub); read its specifics as examples, not
+  architectural dependencies.
 - **A shared-docs repo** the sessions pull at start (this `worker-system/` package, or your own
   fork) — the launcher and onboarding reference it.
 - For the launcher: **PowerShell** on Windows, or **tmux + bash** on macOS/Linux. For the metrics:
@@ -62,7 +66,11 @@ which is what it's for.
 3. Launch a couple of workers with **team-up.ps1** (Windows) or **team-up.sh** (macOS/Linux) and watch the queue drain.
 4. After a week, run **scripts/team-impact.py** to see the before/after.
 
-## A note on attribution
+## A note on provenance
 
-Workers sign their work with a neutral codename (e.g. `worker-a`) for traceability. That's a
-contributor handle, not AI attribution — keep handles neutral and out of anything user-facing.
+Every action is traceable to a **stable, neutral worker identity** — the claim comment on the
+ticket, a `Worker: <name>` commit trailer, the sign-off on handoffs. The principle is
+**vendor-neutral traceability, not concealment**: provenance stays fully auditable (you can
+always tell which session did what, and the git author remains the accountable human); what
+stays out of commits and user-facing artifacts is tool/vendor *branding*, which identifies a
+product, not a contributor.

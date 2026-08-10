@@ -91,9 +91,11 @@ but UX/product always stays the human's.
   move to Ready. Surface to the human only genuine product-direction / UX-vision / visual-feel
   / ops / prod-promotion / cost decisions — always **with a recommendation.** Ending a pass
   with "nothing actionable for me" is rarely true; owning the engineering decisions IS the job.
-- **No AI attribution anywhere** (neutral worker codenames are fine). Sign work with a
-  neutral session handle — it identifies a contributor, not a tool, so it aids traceability
-  without revealing the assistant.
+- **Trace work to stable worker identities, not tool branding.** Sign everything with a
+  neutral session handle (claim comments, `Worker: <name>` commit trailers, handoff
+  sign-offs) — provenance stays fully auditable, the git author remains the accountable
+  human, and vendor/model branding stays out of commits and user-facing artifacts. It
+  identifies a contributor, not a product: vendor-neutral traceability, not concealment.
 
 ## Known failure modes (the supervision/liveness gap)
 

@@ -29,16 +29,18 @@ retrace who did what.
   waiting to happen (a skim misreads one's claim/commit/handoff as the other's). If
   your name collides, ask for a different one before claiming.
 
-Keep the name **neutral** — a plain handle, never anything that reveals AI ("AI",
-"bot", "assistant", or a model name). That is what keeps signing compatible with the
-no-AI-attribution rule.
+Keep the name **neutral** — a plain handle, never a tool or vendor name ("AI",
+"bot", "assistant", or a model name). The handle identifies a *contributor*, not a
+product: that is what keeps signing auditable (every action traces to a stable
+identity) while keeping vendor branding out of the history.
 
 **Sign your work with your name**, everywhere you author something:
 - The tracker — the `claim:` comment and the verify / blocked pings.
 - Commits — a trailer line `Worker: <name>` (the git author stays the human).
 - Session handoffs and any other doc you write — `— <name>`.
-- **Never** AI attribution (no `Co-Authored-By`, no "Generated with ..."). A neutral
-  codename is a handle, not AI credit.
+- **Never** tool/vendor branding in place of identity (no `Co-Authored-By: <tool>`, no
+  "Generated with ..."). Branding names a product; the codename names the contributor —
+  provenance stays auditable through the handle, the trailer, and the tracker trail.
 
 ## Ticket status & lifecycle
 
@@ -692,8 +694,9 @@ to any specific session.
   flagged refactors (e.g. a project-wide terminology rename) — those stay in To Do.
 - **Never merge to the production branch** — that's a human-gated step after
   verification.
-- **Never** skip hooks, force-push, or amend. No AI attribution in commits — but a
-  neutral `Worker: <name>` sign-off trailer is fine (see Worker identity).
+- **Never** skip hooks, force-push, or amend. No tool/vendor branding in commits — sign
+  with the neutral `Worker: <name>` trailer instead (see Worker identity), which keeps
+  provenance auditable without branding the history.
 - One ticket at a time per worker; move it to In Review before claiming the next.
 - Migrations + stale PRs: a PR's base goes stale while it sits, so its migration
   number can collide with one merged meanwhile. If the runner keys on the unique

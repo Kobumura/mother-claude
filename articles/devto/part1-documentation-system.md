@@ -113,12 +113,15 @@ This document has been moved to `littletalks-docs/shared/journey-system.md`
 No duplication = no drift.
 
 ### 2. Security Built In
-PHP projects deployed to web servers get `.htaccess` in their `docs/` folder:
-```apache
-Require all denied
-```
+Internal docs must never be web-accessible. The structural fix — and our standard for any
+new project — is keeping the web root a `public/` subdirectory, so `docs/`, config, and
+secrets are never servable in the first place. For legacy apps whose web root *is* the repo
+root, a deny rule is only defense-in-depth, and it has to cover **both** servers: on
+Apache+nginx stacks (Plesk, for example) nginx serves static files directly and ignores
+`.htaccess`, so an Apache-only deny quietly protects nothing. Then verify from outside —
+`curl` the docs URL and demand a 403/404 — instead of trusting the config.
 
-This is documented in Mother CLAUDE so new projects know to add it.
+This is documented in Mother CLAUDE so new projects inherit it by default.
 
 ### 3. Session Handoffs
 A standardized template (`session-handoff-template.md`) ensures continuity:
@@ -283,7 +286,7 @@ This emerged from a greenfield rebuild where we wanted to prevent the technical 
 1. **Create a shared docs repo** with Mother CLAUDE
 2. **Keep project CLAUDE.md lean** (<100 lines)
 3. **Move shared docs** to single source of truth
-4. **Add security** (.htaccess for web-deployed PHP)
+4. **Keep internal docs out of the web root** (and verify with curl, not config-reading)
 5. **Create EVOLUTION.md** for legacy projects
 6. **Get feedback** from Claude on first session
 7. **Iterate** based on what's missing

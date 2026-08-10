@@ -1,7 +1,8 @@
-# AI-Slop Prevention — the pre-commit checklist
+# AI-Generated Code Quality — the pre-commit checklist
 
-"AI slop" is plausible-looking code that is over-long, duplicated, over-guarded, weakly typed,
-or mixes concerns. **Before every commit, stop and fix if you catch:**
+> Internally we call this the **"AI-slop" checklist**: slop is plausible-looking code that is
+> over-long, duplicated, over-guarded, weakly typed, or mixes concerns.
+> **Before every commit, stop and fix if you catch:**
 
 - [ ] `any` added (TS) / undocumented untyped boundary (JS JSDoc)
 - [ ] Inline styling literal (`style={{`) or raw hex/size outside the token system
@@ -16,4 +17,4 @@ or mixes concerns. **Before every commit, stop and fix if you catch:**
 - [ ] `eslint-disable` / `@ts-ignore` without a `// why:` line
 
 > Full standards: [`code-standards.md`](code-standards.md). The retro/checkpoint agent runs this
-> list as part of [`checkpoint-checklist.md`](../checkpoint-checklist.md).
+> list as part of [`checkpoint-checklist.md`](../../templates/checkpoint-checklist.md).

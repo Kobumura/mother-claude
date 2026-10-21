@@ -1,6 +1,6 @@
 # Maestro E2E Playbook
 
-> **Companion to** [`e2e-testing-standards.md`](../e2e-testing-standards.md).
+> **Companion to** [`e2e-testing-standards.md`](e2e-testing-standards.md).
 > That doc is the **conventions** (testID naming, selector priority, flow structure). This is the
 > **war-stories** — the specific failures we hit running Maestro on real React Native apps in CI,
 > and the fixes that actually worked. Mined from a production React Native app (2025). Read it
@@ -42,6 +42,12 @@ side effect at launch, and never trust a green mocked flow to catch client/serve
 - **Defensively dismiss OS/keyboard overlays.** CI and real devices inject overlays (clipboard
   prompts, Gboard tips, "deprecated method" warnings). Enumerate the ones your CI image shows and
   add guarded `when: { visible: <text> }` → `pressKey: Back` dismissals.
+- **Dev overlays eat taps — silently.** A *dev* overlay drawn over interactive UI (the LogBox
+  warning banner, the dev menu, or an `autoFocus` input's keyboard sitting over the bottom tab
+  bar) intercepts the touch: the action reports **COMPLETED** but nothing happens. Suppress dev
+  overlays under the UI-test gate (`isUITest && __DEV__`) — disable LogBox / dev menu and gate
+  `autoFocus` off so keyboards don't cover the tab bar. (Distinct from the OS overlays above:
+  these are *your app's* dev-only chrome, so you control them at the gate.)
 - **Use dynamic test data.** Hardcoded emails/phones cause "already exists" failures on re-run. Use
   Maestro built-ins: `test.${TIMESTAMP}@maestro.dev`, `inputRandomEmail`, `inputRandomText`,
   `${RAND_DIGITS_4}`. (Exception: the mocked-verification path may use a *fixed* test phone — see §4.)
@@ -145,6 +151,11 @@ maintain but gives real network-error/timeout coverage.)
 
 ## 7. Hard-won warnings
 
+- 🔴 **"COMPLETED but the next assert fails" → screenshot the device; don't theorize from logs.**
+  When an action reports COMPLETED but the following `assertVisible` fails, a device screenshot
+  cracks the blocker in minutes that CI logs can't — it's almost always an overlay eating the tap
+  (above) or a state the testID doesn't cover. First action on an unexplained completed-but-wrong
+  failure: get visual evidence, then reason.
 - 🔴 **A green mocked E2E does NOT catch client/server contract drift.** Our signup flow passed via
   the launch-arg mock while phone verification was broken in production for ~a month (frontend sent
   `code`, backend expected `passcode`). Mocks bypass exactly the integration that breaks. **Pair

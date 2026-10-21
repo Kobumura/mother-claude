@@ -32,6 +32,16 @@ Bad:   emailInput, signInButton, sign_in_button, HomeScreen
 | Modals | `confirm-dialog`, `alert-modal` | Dialog containers |
 | Toggles/switches | `dark-mode-toggle`, `notifications-toggle` | On/off controls |
 
+### Test a Screen Identity on Every Render State — Not Just the Happy Path
+
+A screen needs a screen-identity `testID` on **every** state it can render — empty, loading,
+error, no-permission, no-camera — not only the populated/happy branch. CI emulators run in
+reduced configurations (cameraless `-camera-back none`, no GMS, software GPU), so a `testID`
+that exists only on the camera-active (or data-present) branch is **invisible in CI** and the
+flow fails for an environment reason that looks like a real bug. Name them `{screen}-{state}`,
+e.g. `scanner-screen-no-camera`, `home-screen-empty`. (The CI emulator ≠ your phone — see
+`maestro-playbook.md` §3.)
+
 ### Platform-Specific Implementation
 
 **React Native** — use the `testID` prop:
@@ -179,6 +189,46 @@ Update it when adding new interactive elements. The retro agent checks for missi
 5. **Prefer IDs over text** — Stable across locales and copy changes
 6. **Test the critical path first** — Login, core feature, purchase. Then edge cases.
 7. **Name IDs for what they ARE, not what they DO** — `signin-button` not `click-to-login`
+
+---
+
+## Test Isolation — production code must not depend on the test tree
+
+- **App code must never import from `__tests__`.** Bundlers exclude the test tree from the
+  release/offline build, so an app-reachable `import` from `__tests__` doesn't merely fail a
+  test — it **breaks the production bundle** (the app can't load JS at all). And a green unit CI
+  won't catch it, because **Jest never bundles** (see `checkpoint-checklist.md` → *CI Gates*).
+- **Shared golden data** that *both* tests and runtime consume belongs in a neutral source dir
+  (e.g. `src/fixtures/`), never `__tests__/`.
+- **Enforce with a cheap guard test** that scans `src/` (excluding `src/__tests__`) for
+  `__tests__` imports — it catches the break in fast Jest CI, not a 17-minute emulator run.
+
+This is the Layer-0 isolation boundary in practice — full layer model in
+[`e2e-architecture.md`](e2e-architecture.md).
+
+---
+
+## Assert Page Integrity — Never a Bare HTTP 200 (server-rendered pages)
+
+For server-rendered pages (PHP, SSR), **a passing page test may never coexist with a server
+fault in the response body.** A `200` only means the request reached a handler — a fatal at the
+*bottom* of a page returns 200 with a stack trace appended to half-rendered HTML, and a
+status-code assertion sails straight past it. Encode the rule as **shared helpers**, not prose
+(prose is exactly how this slips):
+
+- **`expectNoServerError(page)`** — fails on *hard* fault signatures only (`Fatal error`,
+  `Uncaught …Error/Exception`, `Stack trace:`, `Parse error:`, framework 500 markers), so
+  intentional 404/500 specs are unaffected.
+- **`expectPageComplete(page)`** — asserts an end-of-document **sentinel** the layout emits right
+  before `</body>`. A mid-page fatal truncates output before it, so its absence = truncation.
+
+Wire `expectNoServerError` as an **auto fixture** on the shared test so coverage is universal,
+not per-spec opt-in — but **skip it when the test already failed** so it never masks the real
+cause; error-state specs opt out by importing the raw test. This is the server-rendered analog
+of *"green unit CI ≠ runnable app"* (`checkpoint-checklist.md` → *CI Gates*): proof the request
+arrived, never proof the page rendered. *(Provenance: an admin page returned 200 with a stack
+trace on a truncated body; a whole feature was dead for days while unit tests, lint, and
+top-of-page e2e all stayed green.)*
 
 ---
 

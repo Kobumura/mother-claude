@@ -10,6 +10,8 @@ violates them.
 | [ai-slop-checklist.md](ai-slop-checklist.md) | The pre-commit gate — the checklist that catches the failure modes AI code review misses (type escapes, inline styles, SQL injection, copy-paste, swallowed errors). |
 | [e2e-testing-standards.md](e2e-testing-standards.md) | End-to-end testing conventions — testID naming, selector priority, flow structure, CI integration. |
 | [maestro-playbook.md](maestro-playbook.md) | The hard-won operational playbook for Maestro mobile E2E — flake/brittleness patterns, simulator + bundler gotchas, mocking strategy, CI wiring. |
+| [e2e-architecture.md](e2e-architecture.md) | The layered E2E test pyramid for mobile apps — harness, smoke, journeys, unit — and which dependencies each layer must mock. |
+| [diagnosis-traps.md](diagnosis-traps.md) | Checks to run before trusting a failure: when the tool showing you the failure is the thing that's broken. |
 
 These are generic, adapt-to-your-stack standards. Each repo can extend them with a stack-specific
 `coding-standards.md` / `testing-standards.md`; the repo-local doc wins on specifics, but the
